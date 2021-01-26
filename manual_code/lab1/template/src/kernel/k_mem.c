@@ -41,7 +41,7 @@
  */
 
 typedef struct Node {
-	int size;
+	unsigned int size;
 	int isFree;
 	struct Node *next;
 } Node;
@@ -80,7 +80,7 @@ int k_mem_init(void) {
 #endif /* DEBUG_0 */
 
     //check if end addr is valid
-    int totalSize = 0xBFFFFFFF - end_addr;
+    unsigned int totalSize = 0xBFFFFFFF - end_addr;
     if(totalSize <= 0) {
     	return RTX_ERR;
     }
@@ -103,15 +103,15 @@ void* k_mem_alloc(size_t size) {
 
     // 4 byte align
     if (size % 4 == 0) {
-        size = ((int)(size / 4)) * 4;
+        size = ((unsigned int)(size / 4)) * 4;
     } else {
-        size = ((int)(size / 4)) * 4 + 4;
+        size = ((unsigned int)(size / 4)) * 4 + 4;
     }
 
     Node* curr = HEAD;
 
     while(curr != NULL) {
-    	if (size <= curr->size && curr->isFree) {
+    	if ((size + sizeof(struct node)) <= curr->size && curr->isFree) {
     		break;
     	}
 
@@ -202,7 +202,7 @@ int k_mem_count_extfrag(size_t size) {
 #endif /* DEBUG_0 */
     // return RTX_OK;
 
-    int memRegionSize;
+    unsigned int memRegionSize;
     int regionCount = 0;
 
     Node* curNode = HEAD; // HEAD is global var
