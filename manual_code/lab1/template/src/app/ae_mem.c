@@ -97,6 +97,45 @@ int test_reuse_freed(void) {
 	return result == 63;
 }
 
+int test_reuse_freed_2(void) {
+	void *p[4];
+	U32 result = 0;
+	if (countNodes()==1){
+		result |= BIT(0);
+	}
+
+	p[0] = mem_alloc(12);
+	p[1] = mem_alloc(24);
+	p[2] = mem_alloc(48);
+
+    if (countNodes()==4){
+    	result |= BIT(1);
+    }
+
+    mem_dealloc(p[1]);
+    if (countNodes()==4){
+		result |= BIT(2);
+	}
+
+    p[3] = mem_alloc(20);
+	if (countNodes()==4){
+		result |= BIT(3);
+	}
+
+	mem_dealloc(p[0]);
+	mem_dealloc(p[2]);
+	mem_dealloc(p[3]);
+	if (countNodes()==1){
+		result |= BIT(4);
+	}
+
+	if(memLeakCheck()==1){
+		result |= BIT(5);
+	}
+
+	return result == 63;
+}
+
 int test_malloc_new_node(void) {
 	void *p[4];
 	U32 result = 0;
@@ -174,11 +213,14 @@ int test_mem(void) {
 	if(test_reuse_freed()){
 		result |= BIT(2);
 	}
-	if(test_malloc_new_node()){
+	if(test_reuse_freed_2()){
 		result |= BIT(3);
 	}
+	if(test_malloc_new_node()){
+		result |= BIT(4);
+	}
 
-	return result == 15;
+	return result == 31;
 }
 
 
