@@ -260,32 +260,28 @@ int test_extfrag(void){
 	return result == 127;
 }
 
-static unsigned long int next = 1;
-
-int rand(void) // RAND_MAX assumed to be 32767
-{
-    next = next * 1103515245 + 12345;
-    return (unsigned int)(next/65536) % 32768;
-}
-
-double test_utilization() {
-    double totalUsed = 0;
+int test_utilization(void) {
+	unsigned int totalUsed = 0;
     unsigned int counter = 0;
-    double regionSize = 16777216;
+    unsigned int regionSize = 1048576;
+    unsigned int magicSize = 1070585247;
 
-    while(TRUE){
+    while(1){
         if (mem_alloc(regionSize) == NULL) {
             break;
         }
-        totalUsed += 1048576;
+        totalUsed += regionSize;
         counter++;
+        if(totalUsed > magicSize){
+        	return -1;
+        }
     }
 
     unsigned int numAllocs = counter;
-    return totalUsed;
+    return 0;
 }
 
-int test_throughput(){
+int test_throughput(void){
 	for(int i = 0; i < 200; i++){
 		test_reuse_freed_2();
 	}
@@ -293,12 +289,8 @@ int test_throughput(){
 }
 
 int test_mem(void) {
-	U32 result = 0;
-
-//	memLeakCheck();
-
-//	test_throughput();
-//  return 1;
+// Function Tests:
+//	U32 result = 0;
 //
 //	if(test_mem_leak()){
 //		result |= BIT(0);
@@ -319,10 +311,17 @@ int test_mem(void) {
 //		result |= BIT(5);
 //	}
 //
-	test_utilization();
+//  return result == 63;
+
+// 	Throughput Test: (function needs to be updated
+//	test_throughput();
+//  return 1;
+
+//  Utilization Test: Maxes out memory
+	int utilResult = test_utilization();
 	return 1;
 
-	// return result == 63;
+
 }
 
 
