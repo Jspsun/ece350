@@ -228,12 +228,8 @@ int test_extfrag(void){
     	result |= BIT(2);
     }
 
-	print_list();
-
 	mem_dealloc(p[4]);
 	p[8] = mem_alloc(18);
-
-	print_list();
 
 	if (countNodes() == 10){
     	result |= BIT(3);
@@ -264,9 +260,34 @@ int test_extfrag(void){
 	return result == 127;
 }
 
+static unsigned long int next = 1;
+
+int rand(void) // RAND_MAX assumed to be 32767
+{
+    next = next * 1103515245 + 12345;
+    return (unsigned int)(next/65536) % 32768;
+}
+
+double test_utilization() {
+    double totalUsed = 0;
+    unsigned int counter = 0;
+    double regionSize = 16777216;
+
+    while(TRUE){
+        if (mem_alloc(regionSize) == NULL) {
+            break;
+        }
+        totalUsed += 1048576;
+        counter++;
+    }
+
+    unsigned int numAllocs = counter;
+    return totalUsed;
+}
+
 int test_throughput(){
 	for(int i = 0; i < 200; i++){
-		test_mem_leak();
+		test_reuse_freed_2();
 	}
 	return 1;
 }
@@ -274,27 +295,32 @@ int test_throughput(){
 int test_mem(void) {
 	U32 result = 0;
 
-	test_throughput();
-	return 1;
+//	memLeakCheck();
 
-	// if(test_mem_leak()){
-	// 	result |= BIT(0);
-	// }
-	// if(test_coales()){
-	// 	result |= BIT(1);
-	// }
-	// if(test_reuse_freed()){
-	// 	result |= BIT(2);
-	// }
-	// if(test_reuse_freed_2()){
-	// 	result |= BIT(3);
-	// }
-	// if(test_malloc_new_node()){
-	// 	result |= BIT(4);
-	// }
-	// if(test_extfrag()){
-	// 	result |= BIT(5);
-	// }
+//	test_throughput();
+//  return 1;
+//
+//	if(test_mem_leak()){
+//		result |= BIT(0);
+//	}
+//	if(test_coales()){
+//		result |= BIT(1);
+//	}
+//	if(test_reuse_freed()){
+//		result |= BIT(2);
+//	}
+//	if(test_reuse_freed_2()){
+//		result |= BIT(3);
+//	}
+//	if(test_malloc_new_node()){
+//		result |= BIT(4);
+//	}
+//	if(test_extfrag()){
+//		result |= BIT(5);
+//	}
+//
+	test_utilization();
+	return 1;
 
 	// return result == 63;
 }
