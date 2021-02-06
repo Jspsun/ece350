@@ -178,6 +178,12 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
     g_num_active_tasks++;
     gp_current_task = p_tcb;
 
+    // initialize TCB states in g_tcbs to DORMANT
+    for(int i = 1; i < MAX_TASKS; i++){
+        g_tcbs[i].state = DORMANT;
+        g_tcbs[i].tid = i;
+    }
+
     // create the rest of the tasks
     p_taskinfo = task_info;
     for ( int i = 0; i < num_tasks; i++ ) {
@@ -383,6 +389,63 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
     printf("k_tsk_create: entering...\n\r");
     printf("task = 0x%x, task_entry = 0x%x, prio=%d, stack_size = %d\n\r", task, task_entry, prio, stack_size);
 #endif /* DEBUG_0 */
+
+    // TODO: `k_tsk_create` is non-blocking, but can be preempted by `scheduler`
+    // TODO: we modified k_mem_init, is that okay
+    // TODO: can never have g_num_active_tasks == MAX_TASKS?
+    // TODO: where does RAM end? fix later
+    // TODO: check pointers
+    // TODO: error checking additional conditions
+
+    if (g_num_active_tasks == MAX_TASKS - 1){
+        return RTX_ERR;
+    }
+
+    // stack size too small
+    if (stack_size < PROC_STACK_SIZE){
+        return RTX_ERR;
+    }
+
+    // stack size too big
+    int ALL_HEAP = RAM_END;
+    int suitable_regions = k_mem_count_extfrag(ALL_HEAP) - k_mem_count_extfrag(stack_size);
+    if (!suitable_regions){
+        return RTX_ERR;
+    }
+
+    // prio invalid
+    if (prio != HIGH || prio != MEDIUM || prio != LOW || prio != LOWEST){
+        return RTX_ERR;
+    }
+
+
+    RTX_TASK_INFO task_info;
+    TCB * p_tcb = NULL;
+    
+    // linear traverse to find free TID in g_tcbs;
+    for (int i=0; i < MAX_TASKS; i++){
+        // get dormant TCB
+        if(g_tcbs[i].state == DORMANT){
+            p_tcb = &g_tcbs[i];
+        }
+    }
+    
+    // get TID and store in buffer
+    *task = p_tcb->tid;
+
+    // fill in task_info
+    task_info.prio = prio;
+    task_info.priv = 0;
+    task_info.u_stack_size = stack_size;
+    task_info.ptask = task_entry;
+    
+    // call k_tsk_create_new
+    if (k_tsk_create_new(&task_info, p_tcb, *task) == RTX_ERR){
+        return RTX_ERR;
+    }
+
+    g_num_active_tasks++;
+
     return RTX_OK;
 
 }
@@ -392,6 +455,9 @@ void k_tsk_exit(void)
 #ifdef DEBUG_0
     printf("k_tsk_exit: entering...\n\r");
 #endif /* DEBUG_0 */
+    
+    g_num_active_tasks--;
+    
     return;
 }
 
