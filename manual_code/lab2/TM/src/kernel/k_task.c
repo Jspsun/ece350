@@ -178,7 +178,7 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
     g_num_active_tasks++;
     gp_current_task = p_tcb;
 
-    // initialize TCB states in g_tcbs to DORMANT
+    // initialize TCB task id and states to DORMANT
     for(int i = 1; i < MAX_TASKS; i++){
         g_tcbs[i].state = DORMANT;
         g_tcbs[i].tid = i;
@@ -391,7 +391,6 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
 #endif /* DEBUG_0 */
 
     // TODO: `k_tsk_create` is non-blocking, but can be preempted by `scheduler`
-    // TODO: we modified k_mem_init, is that okay
     // TODO: can never have g_num_active_tasks == MAX_TASKS?
     // TODO: where does RAM end? fix later
     // TODO: check pointers
@@ -446,6 +445,8 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
 
     g_num_active_tasks++;
 
+    //scheduler();
+
     return RTX_OK;
 
 }
@@ -467,6 +468,21 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
     printf("k_tsk_set_prio: entering...\n\r");
     printf("task_id = %d, prio = %d.\n\r", task_id, prio);
 #endif /* DEBUG_0 */
+
+    // TODO: This function never blocks, but can be preempted. what does this mean?
+    // TODO: error checking
+    // TODO: if try to set null task to prio PRIO_NULL, do I let it or error?
+    // invalid TID or TID == 0
+    // prio == PRIO_NULL
+
+    // TODO: how to check priv of task calling this function?
+    // user-mode task can change prio of any user-mode task
+    // user-mode task cannot change prio of kernel task
+
+    // kernel task can change prio of any user-mode or kernel task
+
+    g_tcbs[task_id].prio = prio;
+
     return RTX_OK;    
 }
 
@@ -476,20 +492,27 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
     printf("k_tsk_get: entering...\n\r");
     printf("task_id = %d, buffer = 0x%x.\n\r", task_id, buffer);
 #endif /* DEBUG_0 */    
+    
+    // error checking
     if (buffer == NULL) {
         return RTX_ERR;
     }
+    // invalid TID
+    if (task_id < 0 || task_id > MAX_TASKS-1 || g_tcbs[task_id].state == DORMANT){
+        return RTX_ERR;
+    }
+
     /* The code fills the buffer with some fake task information. 
        You should fill the buffer with correct information    */
     buffer->tid = task_id;
-    buffer->prio = 99;
-    buffer->state = MEDIUM;
-    buffer->priv = 0;
-    buffer->ptask = 0x0;
-    buffer->k_sp = 0xBEEFDEAD;
+    buffer->prio = g_tcbs[task_id].prio;
+    buffer->state = g_tcbs[task_id].state;
+    buffer->priv = g_tcbs[task_id].priv;
+    buffer->ptask = g_tcbs[task_id].ptask;   // is this storing the right thing?
+    buffer->k_sp = g_tcbs[task_id].k_sp;     // added field in TCB, might be able to get away with just getting address from k stack
     buffer->k_stack_size = KERN_STACK_SIZE;
-    buffer->u_sp = 0xDEADBEEF;
-    buffer->u_stack_size = 0x200;
+    buffer->u_sp = g_tcbs[task_id].u_sp;
+    buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
 
     return RTX_OK;     
 }
