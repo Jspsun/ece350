@@ -472,8 +472,16 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
     // TODO: This function never blocks, but can be preempted. what does this mean?
     // TODO: error checking
     // TODO: if try to set null task to prio PRIO_NULL, do I let it or error?
+    
     // invalid TID or TID == 0
-    // prio == PRIO_NULL
+    if (task_id <= 0 || task_id > MAX_TASKS-1 || g_tcbs[task_id].state == DORMANT){
+        return RTX_ERR;
+    }
+
+    // prio invalid or PRIO_NULL
+    if (prio != HIGH || prio != MEDIUM || prio != LOW || prio != LOWEST){
+        return RTX_ERR;
+    }
 
     // TODO: how to check priv of task calling this function?
     // user-mode task can change prio of any user-mode task
@@ -483,7 +491,7 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
 
     g_tcbs[task_id].prio = prio;
 
-    return RTX_OK;    
+    return RTX_OK;
 }
 
 int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
