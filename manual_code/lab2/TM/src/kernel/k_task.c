@@ -392,7 +392,6 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
 
     // TODO: `k_tsk_create` is non-blocking, but can be preempted by `scheduler`
     // TODO: can never have g_num_active_tasks == MAX_TASKS?
-    // TODO: where does RAM end? fix later
     // TODO: check pointers
     // TODO: error checking additional conditions
 
@@ -470,7 +469,6 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
 #endif /* DEBUG_0 */
 
     // TODO: This function never blocks, but can be preempted. what does this mean?
-    // TODO: error checking
     // TODO: if try to set null task to prio PRIO_NULL, do I let it or error?
     
     // invalid TID or TID == 0
@@ -483,13 +481,22 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
         return RTX_ERR;
     }
 
-    // TODO: how to check priv of task calling this function?
     // user-mode task can change prio of any user-mode task
     // user-mode task cannot change prio of kernel task
-
     // kernel task can change prio of any user-mode or kernel task
 
-    g_tcbs[task_id].prio = prio;
+    if(gp_current_task->priv == 1){
+        g_tcbs[task_id].prio = prio;
+    } else {
+        if(g_tcbs[task_id].priv == 1){
+            return RTX_ERR;
+        } else {
+            g_tcbs[task_id].prio = prio;
+        }
+    }
+
+    k_tsk_run_new(); // Need to figure out what "can be pre-empted" means
+    // Should calling set_prio switch threads?
 
     return RTX_OK;
 }
