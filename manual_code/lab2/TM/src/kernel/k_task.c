@@ -391,11 +391,10 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
 #endif /* DEBUG_0 */
 
     // TODO: `k_tsk_create` is non-blocking, but can be preempted by `scheduler`
-    // TODO: can never have g_num_active_tasks == MAX_TASKS?
     // TODO: check pointers
     // TODO: error checking additional conditions
 
-    if (g_num_active_tasks == MAX_TASKS - 1){
+    if (g_num_active_tasks == MAX_TASKS){
         return RTX_ERR;
     }
 
