@@ -67,6 +67,7 @@ typedef struct tcb {
     U32        *msp;    /**> msp of the task, TCB_MSP_OFFSET = 4        */
     U8          tid;    /**> task id                                    */
     U8          prio;   /**> Execution priority                         */
+    U32         task_count; /**> Update counter used for FIFO scheduling */
     U8          state;  /**> task state                                 */
     U8          priv;   /**> = 0 unprivileged, =1 privileged            */
     U32         u_stack_hi;     // user-space stack start
