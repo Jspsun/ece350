@@ -268,6 +268,7 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
 
         // store user stack hi pointer in TCB
         p_tcb -> u_stack_hi = *sp + (p_tcb -> u_stack_size);    // user stack hi grows downwards
+        p_tcb->u_stack_size = p_taskinfo->u_stack_size;
 
         // uR12, uR11, ..., uR0
         for ( int j = 0; j < 13; j++ ) {
@@ -295,7 +296,9 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
         *(--sp) = 0x0;
     }
 
-    p_tcb->msp = sp;
+    p_tcb->msp = sp;                        // store msp in TCB
+    p_tcb->ptask = p_taskinfo->ptask;       // store task entry in TCB
+    p_tcb->prio = p_taskinfo->prio;         // store priority in TCB
 
     return RTX_OK;
 }
@@ -510,8 +513,6 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
     printf("task_id = %d, buffer = 0x%x.\n\r", task_id, buffer);
 #endif /* DEBUG_0 */    
     
-    // TODO: is KERN_STACK_SIZE 8 bytes aligned? will it change?
-
     // error checking
     if (buffer == NULL) {
         return RTX_ERR;
@@ -521,13 +522,19 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
         return RTX_ERR;
     }
 
+    // KERN_STACK_SIZE must be 8 bytes aligned
+    U16 kernel_stack_size = KERN_STACK_SIZE;
+    if (KERN_STACK_SIZE % 8 != 0){
+        kernel_stack_size = ((U16)(KERN_STACK_SIZE / 8)) * 8 + 8;
+    }
+
     buffer->tid = task_id;
     buffer->prio = g_tcbs[task_id].prio;
     buffer->state = g_tcbs[task_id].state;
     buffer->priv = g_tcbs[task_id].priv;
     buffer->ptask = g_tcbs[task_id].ptask;
-    buffer->k_stack_hi = *(g_k_stacks[task_id]) + KERN_STACK_SIZE;  // kernel stack hi grows downwards
-    buffer->k_stack_size = KERN_STACK_SIZE;         
+    buffer->k_stack_hi = *(g_k_stacks[task_id]) + kernel_stack_size;  // kernel stack hi grows downwards
+    buffer->k_stack_size = kernel_stack_size;         
     buffer->u_stack_hi = g_tcbs[task_id].u_stack_hi;
     buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
     buffer->u_sp = *(g_tcbs[task_id].msp) - 56;     // 56 bytes down from msp (msp, R0... R12, sp)
