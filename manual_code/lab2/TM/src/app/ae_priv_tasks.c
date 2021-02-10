@@ -65,26 +65,22 @@
 // k_tsk_set_prio invalid TID should fail
 // k_tsk_set_prio dormant task should fail
 
-//----USER TASKS------// (implement in ae_usr_tasks.c)
-// tsk_create
-// tsk_get
+void priv_task_entry(void){
 
-// tsk_create until max_tasks (same priority)
-// tsk_get for all TIDs
-// tsk create > max_tasks should fail
-// tsk_exit 
-// tsk_create should reuse TID
+    RTX_TASK_INFO task_info;
+    task_t tid;
 
-// tsk_create
-// tsk_get
-// tsk_set_prio
-// tsk_get
-// tsk_set_prio PRIO_NULL should fail
-// tsk_set_prio invalid TID should fail
-// tsk_set_prio dormant task should fail
-// tsk_set_prio for kernal task should fail
-// tsk_set_prio for user task
-// tsk_get
+    k_tsk_create(&tid, &stackTooSmall, LOW, 0x200);
+
+    // for(int i = 2; i < MAX_TASKS; i++){             // 0 is Null Task, 1 is this kernel task
+    //     k_tsk_create(&tid, &task1, LOW, 0x200);
+    // }
+
+    // for(int i = 2; i < MAX_TASKS; i++){
+    //     k_tsk_set_prio(&tid, HIGH);
+    // }
+
+}
 
 
 /**************************************************************************//**

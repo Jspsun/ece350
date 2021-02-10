@@ -69,8 +69,10 @@ void task_null (void)
 
 int main() 
 {    
+    int numKernelTasks = 1;
+
     RTX_SYS_INFO  sys_info;
-	RTX_TASK_INFO task_info[2];
+	RTX_TASK_INFO task_info[numKernelTasks];
     char mode = 0;
 
     // CMSIS system initialization
@@ -84,8 +86,10 @@ int main()
     mode = __get_mode();
     printf("mode = 0x%x\r\n", mode);
 
+
+
     // System and Task set up by auto testing software
-    if (ae_init(&sys_info, task_info, 2) != RTX_OK) {
+    if (ae_init(&sys_info, task_info, numKernelTasks) != RTX_OK) {
     	printf("RTX INIT FAILED\r\n");
     	return RTX_ERR;
     }
@@ -93,7 +97,7 @@ int main()
     // start the RTX and built-in tasks
     if (mode == MODE_SVC) {
         gp_current_task = NULL;
-        k_rtx_init(task_info, 2);
+        k_rtx_init(task_info, numKernelTasks);
     }
 
     task_null();

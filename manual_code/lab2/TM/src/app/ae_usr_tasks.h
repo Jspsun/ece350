@@ -43,6 +43,8 @@
 void task1(void);
 void task2(void);
 
+void stackTooSmall(void);
+
 #endif // ! USR_TASK_H_
 
 /*
