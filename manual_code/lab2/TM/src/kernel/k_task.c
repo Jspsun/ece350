@@ -528,7 +528,7 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
     buffer->ptask = g_tcbs[task_id].ptask;
     buffer->k_stack_hi = *(g_k_stacks[task_id]) + KERN_STACK_SIZE;  // kernel stack hi grows downwards
     buffer->k_stack_size = KERN_STACK_SIZE;         
-    buffer->u_stack_hi = *(g_tcbs[task_id].u_stack_hi);
+    buffer->u_stack_hi = g_tcbs[task_id].u_stack_hi;
     buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
     buffer->u_sp = *(g_tcbs[task_id].msp) - 56;     // 56 bytes down from msp (msp, R0... R12, sp)
 
