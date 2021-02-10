@@ -49,6 +49,7 @@
 #include "k_inc.h"
 #include "k_rtx.h"
 
+#define num_tasks 2
 
 extern void __ch_MODE (U32 mode);
 extern void __atomic_on(void);
@@ -69,10 +70,9 @@ void task_null (void)
 
 int main() 
 {    
-    int numKernelTasks = 1;
 
-    RTX_SYS_INFO  sys_info;
-	RTX_TASK_INFO task_info[numKernelTasks];
+    static RTX_SYS_INFO  sys_info;
+	static RTX_TASK_INFO task_info[num_tasks];
     char mode = 0;
 
     // CMSIS system initialization
@@ -89,7 +89,7 @@ int main()
 
 
     // System and Task set up by auto testing software
-    if (ae_init(&sys_info, task_info, numKernelTasks) != RTX_OK) {
+    if (ae_init(&sys_info, task_info, num_tasks) != RTX_OK) {
     	printf("RTX INIT FAILED\r\n");
     	return RTX_ERR;
     }
@@ -97,7 +97,7 @@ int main()
     // start the RTX and built-in tasks
     if (mode == MODE_SVC) {
         gp_current_task = NULL;
-        k_rtx_init(task_info, numKernelTasks);
+        k_rtx_init(task_info, num_tasks);
     }
 
     task_null();

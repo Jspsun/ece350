@@ -80,11 +80,13 @@ void priv_task_entry(void){
 
     int result = 0;
 
-    SER_PutStr ("Stack Size Too Small Test:\n\r");
-    if(k_tsk_create(&tid, &stackTooSmall, LOW, 0x100) == RTX_ERR){
-        printResult(1);
-    } else {
-        printResult(0);
+    while(1) {
+		SER_PutStr ("Stack Size Too Small Test:\n\r");
+		if(k_tsk_create(&tid, &stackTooSmall, LOW, 0x100) == RTX_ERR){
+			printResult(1);
+		} else {
+			printResult(0);
+		}
     }
 
     // Testing max_tasks

@@ -128,10 +128,10 @@ The memory map of the OS image may look like the following:
  *==========================================================================
  */
 
-const int h_array_size = MAX_TASKS;
-TCB* heap[h_array_size];
-U32 current_size = 0;
-U32 g_task_count = 0;
+static const int h_array_size = MAX_TASKS;
+static TCB* heap[h_array_size];
+static U32 current_size = 0;
+static U32 g_task_count = 0;
 
 /*
  *===========================================================================
@@ -286,17 +286,18 @@ TCB *scheduler(void)
 	//int16_t tid = extract_max(heap);
 	if (tid < 0) { return gp_current_task; }
 
-	TCB* current_tid = gp_current_task;
-	TCB max_ready_tid = g_tcbs[(U8)tid];
+	TCB* current_tcb = gp_current_task;
+	TCB max_ready_tcb = g_tcbs[(U8)tid];
 
 	// current task has higher priority
-	if (compare(current_tid, &max_ready_tid)) {
+	if (compare(current_tcb, &max_ready_tcb)) {
 
 		return gp_current_task;
 	}
 
-	gp_current_task = &max_ready_tid;
+	gp_current_task = &max_ready_tcb;
     extract_max(heap);
+    insert(heap, current_tcb);
 
     return gp_current_task;
 
@@ -453,6 +454,12 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
     }
 
     p_tcb->msp = sp;
+//    p_tcb->prio     = PRIO_NULL;
+//    p_tcb->priv     = 1;
+//    p_tcb->tid      = TID_NULL;
+//    p_tcb->state    = RUNNING;
+
+    insert(heap, p_tcb);
 
     return RTX_OK;
 }
@@ -605,11 +612,11 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
 
     //scheduler(); do we need to call?
 
-    if (currently_running()) {
-    	k_tsk_yield();
-    } else {
-    	return RTX_ERR;
-    }
+//    if (currently_running()) {
+//    	k_tsk_yield();
+//    } else {
+//    	return RTX_ERR;
+//    }
 
 
     return RTX_OK;
