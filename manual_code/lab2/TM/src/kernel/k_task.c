@@ -421,6 +421,10 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
         return RTX_ERR;
     }
 
+    // stack_size must be 8 bytes aligned
+    if (stack_size % 8 != 0){
+        stack_size = ((U16)(stack_size / 8)) * 8 + 8;
+    }
 
     RTX_TASK_INFO task_info;
     TCB * tcb = NULL;
@@ -475,35 +479,40 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
 
     // TODO: This function never blocks, but can be preempted. what does this mean?
     // TODO: if try to set null task to prio PRIO_NULL, do I let it or error?
-    
-    // invalid TID or TID == 0
-    if (task_id <= 0 || task_id > MAX_TASKS-1 || g_tcbs[task_id].state == DORMANT){
-        return RTX_ERR;
-    }
 
     // prio invalid or PRIO_NULL
     if (prio != HIGH || prio != MEDIUM || prio != LOW || prio != LOWEST){
         return RTX_ERR;
     }
 
-    // user-mode task can change prio of any user-mode task
-    // user-mode task cannot change prio of kernel task
-    // kernel task can change prio of any user-mode or kernel task
-
-    if(gp_current_task->priv == 1){
-        g_tcbs[task_id].prio = prio;
-    } else {
-        if(g_tcbs[task_id].priv == 1){
-            return RTX_ERR;
-        } else {
-            g_tcbs[task_id].prio = prio;
-        }
+    // dormant TCB
+    if (g_tcbs[task_id].state == DORMANT){
+        return RTX_ERR;
     }
 
-    k_tsk_run_new(); // Need to figure out what "can be pre-empted" means
-    // Should calling set_prio switch threads?
+    // valid TID
+    if (task_id > 0 || task_id < MAX_TASKS){
+        // user-mode task can change prio of any user-mode task
+        // user-mode task cannot change prio of kernel task
+        // kernel task can change prio of any user-mode or kernel task
 
-    return RTX_OK;
+        if(gp_current_task->priv == 1){
+            g_tcbs[task_id].prio = prio;
+        } else {
+            if(g_tcbs[task_id].priv == 1){
+                return RTX_ERR;
+            } else {
+                g_tcbs[task_id].prio = prio;
+            }
+        }
+
+        k_tsk_run_new(); // Need to figure out what "can be pre-empted" means
+        // Should calling set_prio switch threads?
+
+        return RTX_OK;
+    }else{
+        return RTX_ERR;
+    }
 }
 
 int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
@@ -517,36 +526,36 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
     if (buffer == NULL) {
         return RTX_ERR;
     }
-    // invalid TID
-    if (task_id < 0 || task_id > MAX_TASKS-1 || g_tcbs[task_id].state == DORMANT){
+    // Dormant TCB
+    if (g_tcbs[task_id].state == DORMANT){
         return RTX_ERR;
     }
 
-    // KERN_STACK_SIZE must be 8 bytes aligned
-    U16 kernel_stack_size = KERN_STACK_SIZE;
-    if (KERN_STACK_SIZE % 8 != 0){
-        kernel_stack_size = ((U16)(KERN_STACK_SIZE / 8)) * 8 + 8;
-    }
+    // valid TID excluding 0
+    if (task_id > 0 || task_id < MAX_TASKS){
+        buffer->tid = task_id;
+        buffer->prio = g_tcbs[task_id].prio;
+        buffer->state = g_tcbs[task_id].state;
+        buffer->priv = g_tcbs[task_id].priv;
+        buffer->ptask = g_tcbs[task_id].ptask;
+        buffer->k_stack_hi = *(g_k_stacks[task_id]) + KERN_STACK_SIZE;  // kernel stack hi grows downwards
+        buffer->k_stack_size = KERN_STACK_SIZE;         
+        buffer->u_stack_hi = g_tcbs[task_id].u_stack_hi;
+        buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
+        buffer->u_sp = *(g_tcbs[task_id].msp) - 56;     // 56 bytes down from msp (msp, R0... R12, sp)
 
-    buffer->tid = task_id;
-    buffer->prio = g_tcbs[task_id].prio;
-    buffer->state = g_tcbs[task_id].state;
-    buffer->priv = g_tcbs[task_id].priv;
-    buffer->ptask = g_tcbs[task_id].ptask;
-    buffer->k_stack_hi = *(g_k_stacks[task_id]) + kernel_stack_size;  // kernel stack hi grows downwards
-    buffer->k_stack_size = kernel_stack_size;         
-    buffer->u_stack_hi = g_tcbs[task_id].u_stack_hi;
-    buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
-    buffer->u_sp = *(g_tcbs[task_id].msp) - 56;     // 56 bytes down from msp (msp, R0... R12, sp)
+        if (task_id == gp_current_task->tid){
+            int regVal = __current_sp();         // store value of SP register in regVal
+            buffer->k_sp = regVal;
+        }else{
+            buffer->k_sp = *(g_tcbs[task_id].msp);
+        }
 
-    if (task_id == gp_current_task->tid){
-        int regVal = __current_sp();         // store value of SP register in regVal
-        buffer->k_sp = regVal;
+        return RTX_OK;
+
     }else{
-        buffer->k_sp = *(g_tcbs[task_id].msp);
-    }
-
-    return RTX_OK;     
+        return RTX_ERR;
+    }     
 }
 
 int k_tsk_ls(task_t *buf, int count){
