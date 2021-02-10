@@ -69,8 +69,7 @@ typedef struct tcb {
     U8          prio;   /**> Execution priority                         */
     U8          state;  /**> task state                                 */
     U8          priv;   /**> = 0 unprivileged, =1 privileged            */
-    U32         k_sp;           // kernel-space stack pointer
-    U32         u_sp;           // user-space stack pointer
+    U32        *u_stack_hi;     // user-space stack start
     U16         u_stack_size;   // user-space stack size
     void        (*ptask)();     // task entry address
 } TCB;
