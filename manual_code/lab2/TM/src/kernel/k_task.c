@@ -178,7 +178,7 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
     g_num_active_tasks++;
     gp_current_task = p_tcb;
 
-    // initialize TCB task id and states to DORMANT
+    // initialize all TCB task ids and states to DORMANT
     for(int i = 1; i < MAX_TASKS; i++){
         g_tcbs[i].state = DORMANT;
         g_tcbs[i].tid = i;
@@ -265,6 +265,9 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
         //*** allocate user stack from the user space, not implemented yet ***//
         //********************************************************************//
         *(--sp) = (U32) k_alloc_p_stack(tid);
+
+        // store user stack hi pointer in TCB
+        p_tcb -> u_stack_hi = sp;
 
         // uR12, uR11, ..., uR0
         for ( int j = 0; j < 13; j++ ) {
@@ -417,18 +420,18 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
 
 
     RTX_TASK_INFO task_info;
-    TCB * p_tcb = NULL;
+    TCB * tcb = NULL;
     
     // linear traverse to find free TID in g_tcbs;
     for (int i=0; i < MAX_TASKS; i++){
         // get dormant TCB
         if(g_tcbs[i].state == DORMANT){
-            p_tcb = &g_tcbs[i];
+            tcb = &g_tcbs[i];
         }
     }
     
     // get TID and store in buffer
-    *task = p_tcb->tid;
+    *task = tcb->tid;
 
     // fill in task_info
     task_info.prio = prio;
@@ -437,13 +440,13 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
     task_info.ptask = task_entry;
     
     // call k_tsk_create_new
-    if (k_tsk_create_new(&task_info, p_tcb, *task) == RTX_ERR){
+    if (k_tsk_create_new(&task_info, tcb, *task) == RTX_ERR){
         return RTX_ERR;
     }
 
     g_num_active_tasks++;
 
-    //scheduler();
+    //scheduler(); do we need to call?
 
     return RTX_OK;
 
@@ -516,16 +519,19 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
         return RTX_ERR;
     }
 
-    /* The code fills the buffer with some fake task information. 
-       You should fill the buffer with correct information    */
     buffer->tid = task_id;
     buffer->prio = g_tcbs[task_id].prio;
     buffer->state = g_tcbs[task_id].state;
     buffer->priv = g_tcbs[task_id].priv;
-    buffer->ptask = g_tcbs[task_id].ptask;   // is this storing the right thing?
-    buffer->k_sp = g_tcbs[task_id].k_sp;     // added field in TCB, might be able to get away with just getting address from k stack
+    buffer->ptask = g_tcbs[task_id].ptask;
+    buffer->k_sp = *(g_tcbs[task_id].msp);
+    int regVal;
+    asm("STR %%SP, %0" : "=r"(regVal));             // SP register
+    buffer->k_sp = regVal;
+    buffer->k_stack_hi = g_k_stacks[task_id];
     buffer->k_stack_size = KERN_STACK_SIZE;
-    buffer->u_sp = g_tcbs[task_id].u_sp;
+    buffer->u_sp = *(g_tcbs[task_id].msp) - 56;     // 56 bytes down from msp (msp, R0... R12, sp)
+    buffer->u_stack_hi = g_tcbs[task_id].u_stack_hi;
     buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
 
     return RTX_OK;     
