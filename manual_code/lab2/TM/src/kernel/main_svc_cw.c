@@ -67,10 +67,12 @@ void task_null (void)
     }
 }
 
+#define numKernelTasks 1
+
 int main() 
 {    
     static RTX_SYS_INFO  sys_info;
-    static RTX_TASK_INFO task_info[2];
+    static RTX_TASK_INFO task_info[numKernelTasks];
     char mode = 0;
 
     // CMSIS system initialization
