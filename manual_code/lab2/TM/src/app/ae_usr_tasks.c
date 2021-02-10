@@ -62,14 +62,13 @@
 // tsk_get
 
 void stackTooSmall(void){
-    task_t tid;
-    RTX_TASK_INFO task_info;
-    SER_PutStr ("stackTooSmall: entering \n\r");
-    int result = tsk_create(&tid, &task2, HIGH, 0x100);
+    tsk_exit();
+}
 
-#ifdef DEBUG_0
-    printf("stackTooSmall: ret_val=%d\n\r", result);
-#endif /* DEBUG_0 */
+void printTaskID(void){
+    
+
+
 
     tsk_exit();
 }

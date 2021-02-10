@@ -44,6 +44,7 @@ void task1(void);
 void task2(void);
 
 void stackTooSmall(void);
+void printTaskID(void);
 
 #endif // ! USR_TASK_H_
 

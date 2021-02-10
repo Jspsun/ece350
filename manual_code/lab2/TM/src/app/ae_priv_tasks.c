@@ -65,21 +65,47 @@
 // k_tsk_set_prio invalid TID should fail
 // k_tsk_set_prio dormant task should fail
 
+void printResult(int passFail){
+    if(passFail == 1){
+        SER_PutStr ("Test Result: Success \n\r");
+    } else {
+        SER_PutStr ("Test Result: Failure \n\r");
+    }
+}
+
 void priv_task_entry(void){
 
     RTX_TASK_INFO task_info;
     task_t tid;
 
-    k_tsk_create(&tid, &stackTooSmall, LOW, 0x200);
+    int result = 0;
 
+    SER_PutStr ("Stack Size Too Small Test:\n\r");
+    if(k_tsk_create(&tid, &stackTooSmall, LOW, 0x100) == RTX_ERR){
+        printResult(1);
+    } else {
+        printResult(0);
+    }
+
+    // Testing max_tasks
+    // SER_PutStr ("Maximum Stack Size Test:\n\r");
     // for(int i = 2; i < MAX_TASKS; i++){             // 0 is Null Task, 1 is this kernel task
-    //     k_tsk_create(&tid, &task1, LOW, 0x200);
+    //     k_tsk_create(&tid, &printTaskID, LOWEST, 0x200);
     // }
 
+    // if(k_tsk_create(&tid, &printTaskID, LOWEST, 0x200) == RTX_ERR){
+    //     printResult(1);
+    // } else {
+    //     printResult(0);
+    // }
+
+
+    // Testing Priority Stuff
     // for(int i = 2; i < MAX_TASKS; i++){
     //     k_tsk_set_prio(&tid, HIGH);
     // }
 
+    k_tsk_exit();
 }
 
 
