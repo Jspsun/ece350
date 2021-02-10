@@ -43,6 +43,50 @@
 #include "Serial.h"
 #include "printf.h"
 
+// We should print TCB array inside every function for testing?
+
+//------KERNEL TASKS------//
+// k_tsk_create
+// k_tsk_get
+
+// k_tsk_create until max_tasks (same priority)
+// k_tsk_get for all TIDs
+// k_tsk create > max_tasks should fail
+// k_tsk_exit 
+// k_tsk_create should reuse TID
+
+// k_tsk_create
+// tsk_create
+// k_tsk_get
+// k_tsk_set_prio for kernel task
+// k_tsk_set_prio for user task
+// k_tsk_get
+// k_tsk_set_prio PRIO_NULL should fail
+// k_tsk_set_prio invalid TID should fail
+// k_tsk_set_prio dormant task should fail
+
+//----USER TASKS------// (implement in ae_usr_tasks.c)
+// tsk_create
+// tsk_get
+
+// tsk_create until max_tasks (same priority)
+// tsk_get for all TIDs
+// tsk create > max_tasks should fail
+// tsk_exit 
+// tsk_create should reuse TID
+
+// tsk_create
+// tsk_get
+// tsk_set_prio
+// tsk_get
+// tsk_set_prio PRIO_NULL should fail
+// tsk_set_prio invalid TID should fail
+// tsk_set_prio dormant task should fail
+// tsk_set_prio for kernal task should fail
+// tsk_set_prio for user task
+// tsk_get
+
+
 /**************************************************************************//**
  * @brief       a task that prints AAAAA, BBBBB, CCCCC,...., ZZZZZ on each line.
  *              It yields the cpu every 6 lines are printed.
