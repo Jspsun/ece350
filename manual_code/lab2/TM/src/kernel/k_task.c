@@ -287,15 +287,15 @@ TCB *scheduler(void)
 	if (tid < 0) { return gp_current_task; }
 
 	TCB* current_tcb = gp_current_task;
-	TCB max_ready_tcb = g_tcbs[(U8)tid];
+	TCB* max_ready_tcb = &g_tcbs[(U8)tid];
 
 	// current task has higher priority
-	if (compare(current_tcb, &max_ready_tcb)) {
+	if (compare(current_tcb, max_ready_tcb)) {
 
 		return gp_current_task;
 	}
 
-	gp_current_task = &max_ready_tcb;
+	gp_current_task = max_ready_tcb;
     extract_max(heap);
     insert(heap, current_tcb);
 

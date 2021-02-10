@@ -105,15 +105,13 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
         return;
     }
 
-//    for (int i = 0; i < num_tasks; i++ ) {
-//        tasks[i].u_stack_size = 0x0;
-//        tasks[i].prio = HIGH;
-//        tasks[i].priv = 1;
-//    }
-     tasks[0].ptask = &priv_task1;
-     tasks[1].ptask = &priv_task2;
+    for (int i = 0; i < num_tasks; i++ ) {
+        tasks[i].u_stack_size = 0x0;
+        tasks[i].prio = HIGH;
+        tasks[i].priv = 1;
+    }
 
-//    tasks[0].ptask = &priv_task_entry;
+    tasks[0].ptask = &priv_task_entry;
 
     return;
 }
