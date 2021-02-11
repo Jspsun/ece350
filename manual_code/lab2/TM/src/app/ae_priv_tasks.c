@@ -65,6 +65,7 @@
 // k_tsk_set_prio invalid TID should fail
 // k_tsk_set_prio dormant task should fail
 
+
 void printResult(int passFail){
     if(passFail == 1){
         SER_PutStr ("Success\n\r");
@@ -163,6 +164,74 @@ void priv_task_entry(void){
     printResult(k_tsk_create(&tid, &dumdum, LOW, 0x400) == RTX_ERR);
 
     k_tsk_exit();
+}
+
+void reset_scheduling() {
+	for (int i = 0; i < 255; i++) {
+		s_buffer[i] = 0;
+	}
+}
+
+// Function to implement strcmp function
+int strcmp(const char *X, const char *Y)
+{
+    while(*X)
+    {
+        // if characters differ or end of second string is reached
+        if (*X != *Y)
+            break;
+
+        // move to next pair of characters
+        X++;
+        Y++;
+    }
+
+    // return the ASCII difference after converting char* to unsigned char*
+    return *(const unsigned char*)X - *(const unsigned char*)Y;
+}
+
+void priv_tasks_scheduling(void) {
+	/* Test 1:
+	 * Create:
+	 * 3 tasks with high priority,
+	 * 3 tasks with medium priority,
+	 * 3 tasks with low priority,
+	 * 3 tasks with lowest priority
+	 * Expect High 1 high 2 high 3 med 1 med 2 med 3 etc.
+	 *
+	 * Then:
+	 * Create in order of h1, m1, l1, lw1 etc.
+	 *
+	 * Then:
+	 * Create in order of lw1, l1, m1, h1 etc.
+	 *
+	 * Then:
+	 * Create in order of lw3, m2, l1, h3, etc.
+	 *
+	 */
+
+    task_t tid[10];
+
+    reset_scheduling();
+
+    // Expect 0123456789
+    k_tsk_create(&tid[0], &stask0, HIGH, 10000);
+    k_tsk_create(&tid[1], &stask1, HIGH, 10000);
+    k_tsk_create(&tid[2], &stask2, HIGH, 10000);
+    k_tsk_create(&tid[3], &stask3, MEDIUM, 10000);
+    k_tsk_create(&tid[4], &stask4, MEDIUM, 10000);
+    k_tsk_create(&tid[5], &stask5, MEDIUM, 10000);
+    k_tsk_create(&tid[6], &stask6, LOW, 10000);
+    k_tsk_create(&tid[7], &stask7, LOW, 10000);
+    k_tsk_create(&tid[8], &stask8, LOWEST, 10000);
+    k_tsk_create(& tid[9], &stask9, LOWEST, 10000);
+
+    k_tsk_set_prio(gp_current_task->tid, LOWEST);
+
+    k_tsk_yield();
+
+    SER_PutStr("Scheduler output after yielding cpu.\n\r");
+    printResult(strcmp(s_buffer, "0123456789") == 0);
 }
 
 

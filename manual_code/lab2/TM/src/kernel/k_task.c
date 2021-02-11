@@ -238,7 +238,9 @@ void reset_priority(TCB* heap[], U8 tid, U8 priority) {
 
     TCB* v = heap[index];
 
+    g_task_count += 1;
     heap[index]->prio = priority;
+    heap[index]->task_count = g_task_count;
 
     if (compare(heap[index], v)) {
         increase_key(heap, index);
@@ -626,6 +628,7 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
 
     g_num_active_tasks++;
 
+    insert(heap, tcb);
     //scheduler(); do we need to call?
 
 //    if (currently_running()) {
@@ -636,7 +639,6 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
 
 
     return RTX_OK;
-
 }
 
 void k_tsk_exit(void) 
@@ -668,6 +670,10 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
     // dormant TCB
     if (g_tcbs[task_id].state == DORMANT){
         return RTX_ERR;
+    }
+
+    if (prio == g_tcbs[task_id].prio) {
+    	return RTX_OK;
     }
 
     // valid TID

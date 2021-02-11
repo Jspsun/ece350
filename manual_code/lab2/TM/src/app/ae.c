@@ -111,7 +111,7 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
         tasks[i].priv = 1;
     }
 
-    tasks[0].ptask = &priv_task_entry;
+    tasks[0].ptask = &priv_tasks_scheduling;
 
     return;
 }

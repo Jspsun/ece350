@@ -49,8 +49,6 @@
 #include "k_inc.h"
 #include "k_rtx.h"
 
-#define num_tasks 2
-
 extern void __ch_MODE (U32 mode);
 extern void __atomic_on(void);
 extern void __atomic_off(void);
