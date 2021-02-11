@@ -382,7 +382,7 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
         return RTX_ERR;
     }
 
-    p_tcb ->tid = tid;
+    p_tcb->tid = tid;
     p_tcb->state = READY;
 
     /*---------------------------------------------------------------
@@ -426,6 +426,7 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
 
         // store user stack hi pointer in TCB
         p_tcb -> u_stack_hi = *sp + (p_tcb -> u_stack_size);    // user stack hi grows downwards
+        p_tcb->u_stack_size = p_taskinfo->u_stack_size;
 
         // uR12, uR11, ..., uR0
         for ( int j = 0; j < 13; j++ ) {
@@ -453,11 +454,10 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
         *(--sp) = 0x0;
     }
 
-    p_tcb->msp = sp;
-//    p_tcb->prio     = PRIO_NULL;
-//    p_tcb->priv     = 1;
-//    p_tcb->tid      = TID_NULL;
-//    p_tcb->state    = RUNNING;
+    p_tcb->msp = sp;                        // store msp in TCB
+    p_tcb->ptask = p_taskinfo->ptask;       // store task entry in TCB
+    p_tcb->prio = p_taskinfo->prio;         // store priority in TCB
+    p_tcb->priv = p_taskinfo->priv;         // store privilege in
 
     insert(heap, p_tcb);
 
@@ -561,6 +561,17 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
     // TODO: check pointers
     // TODO: error checking additional conditions
 
+    // TID pointer NULL
+    if (task == NULL){
+        return RTX_ERR;
+    }
+
+    // Task entry pointer NULL
+    if (task_entry == NULL){
+        return RTX_ERR;
+    }
+
+    // Maximum number of tasks reached
     if (g_num_active_tasks == MAX_TASKS){
         return RTX_ERR;
     }
@@ -571,17 +582,21 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
     }
 
     // stack size too big
-    int ALL_HEAP = RAM_END;
-    int suitable_regions = k_mem_count_extfrag(ALL_HEAP) - k_mem_count_extfrag(stack_size);
+    size_t ALL_HEAP = 0xFFFFFFFF;
+    size_t suitable_regions = k_mem_count_extfrag(ALL_HEAP) - k_mem_count_extfrag(stack_size);
     if (!suitable_regions){
         return RTX_ERR;
     }
 
-    // prio invalid
-    if (prio != HIGH || prio != MEDIUM || prio != LOW || prio != LOWEST){
+    // stack_size not 8 bytes aligned
+    if (stack_size % 8 != 0){
         return RTX_ERR;
     }
 
+    // prio invalid
+    if (prio != HIGH && prio != MEDIUM && prio != LOW && prio != LOWEST){
+        return RTX_ERR;
+    }
 
     RTX_TASK_INFO task_info;
     TCB * tcb = NULL;
@@ -591,6 +606,7 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
         // get dormant TCB
         if(g_tcbs[i].state == DORMANT){
             tcb = &g_tcbs[i];
+            break;
         }
     }
     
@@ -643,38 +659,45 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
 
     // TODO: This function never blocks, but can be preempted. what does this mean?
     // TODO: if try to set null task to prio PRIO_NULL, do I let it or error?
-    
-    // invalid TID or TID == 0
-    if (task_id <= 0 || task_id > MAX_TASKS-1 || g_tcbs[task_id].state == DORMANT){
-        return RTX_ERR;
-    }
 
     // prio invalid or PRIO_NULL
-    if (prio != HIGH || prio != MEDIUM || prio != LOW || prio != LOWEST){
+    if (prio != HIGH && prio != MEDIUM && prio != LOW && prio != LOWEST){
         return RTX_ERR;
     }
 
-    // user-mode task can change prio of any user-mode task
-    // user-mode task cannot change prio of kernel task
-    // kernel task can change prio of any user-mode or kernel task
-
-    if(gp_current_task->priv == 1){
-        g_tcbs[task_id].prio = prio;
-    } else {
-        if(g_tcbs[task_id].priv == 1){
-            return RTX_ERR;
-        } else {
-            g_tcbs[task_id].prio = prio;
-        }
+    // dormant TCB
+    if (g_tcbs[task_id].state == DORMANT){
+        return RTX_ERR;
     }
+
+    // valid TID
+    if (task_id > 0 && task_id < MAX_TASKS){
+        // user-mode task can change prio of any user-mode task
+        // user-mode task cannot change prio of kernel task
+        // kernel task can change prio of any user-mode or kernel task
+
+        if(gp_current_task->priv == 1){
+            g_tcbs[task_id].prio = prio;
+        } else {
+            if(g_tcbs[task_id].priv == 1){
+                return RTX_ERR;
+            } else {
+                g_tcbs[task_id].prio = prio;
+            }
+        }
 
     reset_priority(heap, task_id, prio);
 
     k_tsk_yield();
     // Need to figure out what "can be pre-empted" means
     // Should calling set_prio switch threads?
+        // _tsk_run_new(); // Need to figure out what "can be pre-empted" means
+        // Should calling set_prio switch threads?
 
-    return RTX_OK;
+        return RTX_OK;
+    }else{
+        return RTX_ERR;
+    }
 }
 
 int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
@@ -684,36 +707,40 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
     printf("task_id = %d, buffer = 0x%x.\n\r", task_id, buffer);
 #endif /* DEBUG_0 */    
     
-    // TODO: is KERN_STACK_SIZE 8 bytes aligned? will it change?
-
     // error checking
     if (buffer == NULL) {
         return RTX_ERR;
     }
-    // invalid TID
-    if (task_id < 0 || task_id > MAX_TASKS-1 || g_tcbs[task_id].state == DORMANT){
+    // Dormant TCB
+    if (g_tcbs[task_id].state == DORMANT){
         return RTX_ERR;
     }
 
-    buffer->tid = task_id;
-    buffer->prio = g_tcbs[task_id].prio;
-    buffer->state = g_tcbs[task_id].state;
-    buffer->priv = g_tcbs[task_id].priv;
-    buffer->ptask = g_tcbs[task_id].ptask;
-    buffer->k_stack_hi = *(g_k_stacks[task_id]) + KERN_STACK_SIZE;  // kernel stack hi grows downwards
-    buffer->k_stack_size = KERN_STACK_SIZE;         
-    buffer->u_stack_hi = g_tcbs[task_id].u_stack_hi;
-    buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
-    buffer->u_sp = *(g_tcbs[task_id].msp) - 56;     // 56 bytes down from msp (msp, R0... R12, sp)
+    // valid TID excluding 0
+    if (task_id > 0 && task_id < MAX_TASKS){
+        buffer->tid = task_id;
+        buffer->prio = g_tcbs[task_id].prio;
+        buffer->state = g_tcbs[task_id].state;
+        buffer->priv = g_tcbs[task_id].priv;
+        buffer->ptask = g_tcbs[task_id].ptask;
+        buffer->k_stack_hi = *(g_k_stacks[task_id]) + KERN_STACK_SIZE;  // kernel stack hi grows downwards
+        buffer->k_stack_size = KERN_STACK_SIZE;         
+        buffer->u_stack_hi = g_tcbs[task_id].u_stack_hi;
+        buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
+        buffer->u_sp = *(g_tcbs[task_id].msp) - 56;     // 56 bytes down from msp (msp, R0... R12, sp)
 
-    if (task_id == gp_current_task->tid){
-        int regVal = __current_sp();         // store value of SP register in regVal
-        buffer->k_sp = regVal;
+        if (task_id == gp_current_task->tid){
+            int regVal = __current_sp();         // store value of SP register in regVal
+            buffer->k_sp = regVal;
+        }else{
+            buffer->k_sp = *(g_tcbs[task_id].msp);
+        }
+
+        return RTX_OK;
+
     }else{
-        buffer->k_sp = *(g_tcbs[task_id].msp);
-    }
-
-    return RTX_OK;     
+        return RTX_ERR;
+    }     
 }
 
 int k_tsk_ls(task_t *buf, int count){

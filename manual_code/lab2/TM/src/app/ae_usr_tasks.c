@@ -61,15 +61,8 @@
 // tsk_set_prio for user task
 // tsk_get
 
-void stackTooSmall(void){
-    tsk_exit();
-}
-
-void printTaskID(void){
-    
-
-
-
+void dumdum(void){
+    SER_PutStr ("I have brain damage\n\r");
     tsk_exit();
 }
 
