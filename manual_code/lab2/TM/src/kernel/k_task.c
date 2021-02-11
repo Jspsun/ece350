@@ -494,7 +494,7 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
     // TODO: if try to set null task to prio PRIO_NULL, do I let it or error?
 
     // prio invalid or PRIO_NULL
-    if (prio != HIGH || prio != MEDIUM || prio != LOW || prio != LOWEST){
+    if (prio != HIGH && prio != MEDIUM && prio != LOW && prio != LOWEST){
         return RTX_ERR;
     }
 
@@ -519,7 +519,7 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
             }
         }
 
-        k_tsk_run_new(); // Need to figure out what "can be pre-empted" means
+        // _tsk_run_new(); // Need to figure out what "can be pre-empted" means
         // Should calling set_prio switch threads?
 
         return RTX_OK;
