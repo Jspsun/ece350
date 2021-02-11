@@ -65,11 +65,18 @@
 // k_tsk_set_prio invalid TID should fail
 // k_tsk_set_prio dormant task should fail
 
+U32 result = 1;
+U32 numtests = 0;
+
 void printResult(int passFail){
+    numtests++;
     if(passFail == 1){
-        SER_PutStr ("Success\n\r");
+        SER_PutStr ("--- Success ---\n\r");
+        result << 1;
+        result += 1;
     } else {
-        SER_PutStr ("Failure\n\r");
+        SER_PutStr ("--- !!! FAILURE !!! ---\n\r");
+        result << 1;
     }
 }
 
@@ -84,7 +91,7 @@ void priv_task_entry(void){
     SER_PutStr ("Stack Size Not 8b Aligned:\n\r");
     printResult(k_tsk_create(&tid, &dumdum, LOW, 0x401) == RTX_ERR);
     // SER_PutStr ("Stack Size Too Big:\n\r");
-    // printResult(k_tsk_create(&tid, &dumdum, LOW, 0xFFFFFF00) == RTX_ERR);
+    // printResult(k_tsk_create(&tid, &dumdum, LOW, 0xFFFFFF00) == RTX_ERR);	 // U16 stack_size
     SER_PutStr ("Prio Invalid:\n\r");
     printResult(k_tsk_create(&tid, &dumdum, 99, 0x400) == RTX_ERR);
     SER_PutStr ("Prio Null:\n\r");
@@ -93,6 +100,14 @@ void priv_task_entry(void){
     printResult(k_tsk_create(NULL, &dumdum, LOW, 0x400) == RTX_ERR);
     SER_PutStr ("Null task:\n\r");
     printResult(k_tsk_create(&tid, NULL, LOW, 0x400) == RTX_ERR);
+
+    if (result == 7){
+    	printf(">>>>>>>>>> TESTS PASSED <<<<<<<<<<<< \n\r");
+    }else{
+    	printf(">>>>>>>>>> TESTS FAILED:  %d <<<<<<<<<<<< \n\r", 7 - result);
+    }
+
+    result = 1;
 
     SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 2. tsk_create and tsk_get Function Test:\n\r");
     k_tsk_create(&tid, &dumdum, LOW, 0x400);
@@ -113,6 +128,14 @@ void priv_task_entry(void){
     SER_PutStr ("Compare Privilege:\n\r");
     printResult(task_info.priv == 0);
     
+    if (result == 8){
+    	printf(">>>>>>>>>> TESTS PASSED <<<<<<<<<<<< \n\r");
+    }else{
+    	printf(">>>>>>>>>> TESTS FAILED:  %d <<<<<<<<<<<< \n\r", 8 - result);
+    }
+
+    result = 1;
+
     SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 3. tsk_get Failure Test:\n\r");
     SER_PutStr ("Task ID 0:\n\r");
     printResult(k_tsk_get(0, &task_info) == RTX_ERR);
@@ -125,6 +148,14 @@ void priv_task_entry(void){
     SER_PutStr ("Dormant Task Mid:\n\r");
     printResult(k_tsk_get(MAX_TASKS/2, &task_info) == RTX_ERR);
 
+    if (result == 6){
+    	printf(">>>>>>>>>> TESTS PASSED <<<<<<<<<<<< \n\r");
+    }else{
+    	printf(">>>>>>>>>> TESTS FAILED:  %d <<<<<<<<<<<< \n\r", 6 - result);
+    }
+
+    result = 1;
+
     SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 4. set_prio Function Test:\n\r");
     SER_PutStr ("Set user prio:\n\r");
     k_tsk_set_prio(tid, LOWEST);
@@ -134,6 +165,14 @@ void priv_task_entry(void){
     k_tsk_set_prio(1, HIGH);
     k_tsk_get(1, &task_info);
     printResult(task_info.prio == HIGH);
+
+    if (result == 3){
+    	printf(">>>>>>>>>> TESTS PASSED <<<<<<<<<<<< \n\r");
+    }else{
+    	printf(">>>>>>>>>> TESTS FAILED:  %d <<<<<<<<<<<< \n\r", 3 - result);
+    }
+
+    result = 1;
 
     SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 5. set_prio Failure Test:\n\r");
     SER_PutStr ("Task ID 0:\n\r");
@@ -151,6 +190,13 @@ void priv_task_entry(void){
     // SER_PutStr ("Privilege Check:\n\r"); // THIS IS WILL PASS FOR KERNEL TASK
     // printResult(k_tsk_set_prio(1, HIGH) == RTX_ERR);
 
+    if (result == 7){
+    	printf(">>>>>>>>>> TESTS PASSED <<<<<<<<<<<< \n\r");
+    }else{
+    	printf(">>>>>>>>>> TESTS FAILED:  %d <<<<<<<<<<<< \n\r", 7 - result);
+    }
+
+    result = 1;
 
     SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 1. tsk_create Stress Function Test:\n\r");
 
@@ -161,6 +207,12 @@ void priv_task_entry(void){
 
     SER_PutStr ("Creating Another Task Fails:\n\r");
     printResult(k_tsk_create(&tid, &dumdum, LOW, 0x400) == RTX_ERR);
+
+    if (result == 2){
+    	printf(">>>>>>>>>> TESTS PASSED <<<<<<<<<<<< \n\r");
+    }else{
+    	printf(">>>>>>>>>> TESTS FAILED:  %d <<<<<<<<<<<< \n\r", 2 - result);
+    }
 
     k_tsk_exit();
 }
