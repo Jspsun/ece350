@@ -141,7 +141,7 @@ static U32 g_task_count = 0;
 
 int compare(TCB *t1, TCB* t2) {
     int result = (*t1).prio < (*t2).prio || ((*t1).prio == (*t2).prio && (*t1).task_count <= (*t2).task_count);
-//    printf("V1: %d, %d, %d - V2: %d, %d, %d - Result: %d\n", v1.m_val, v1.m_priority, v1.task_count, v2.m_val, v2.m_priority, v2.task_count, result);
+  //  printf("V1: %d, %d, %d - V2: %d, %d, %d - Result: %d\r\n", t1->tid, t1->prio, t1->task_count, t2->tid, t2->prio, t2->task_count, result);
     return result;
 }
 
@@ -153,7 +153,7 @@ void swap(TCB** t1, TCB** t2) {
 }
 
 int parent(int i) {
-    return (i > 0 && i < h_array_size) ? i / 2 : -1;
+    return (i > 0 && i < h_array_size) ? (i - 1) / 2 : -1;
 }
 
 int left_child(int i) {
@@ -236,13 +236,13 @@ void reset_priority(TCB* heap[], U8 tid, U8 priority) {
     int index = find_value(heap, tid);
     if (index < 0) { return; }
 
-    TCB* v = heap[index];
+    TCB v = *heap[index];
 
     g_task_count += 1;
     heap[index]->prio = priority;
     heap[index]->task_count = g_task_count;
 
-    if (compare(heap[index], v)) {
+    if (compare(heap[index], &v)) {
         increase_key(heap, index);
     } else {
         decrease_key(heap, index);
@@ -292,7 +292,7 @@ TCB *scheduler(void)
 	TCB* max_ready_tcb = &g_tcbs[(U8)tid];
 
 	// current task has higher priority
-	if (compare(current_tcb, max_ready_tcb)) {
+	if (gp_current_task->state != DORMANT && compare(current_tcb, max_ready_tcb)) {
 
 		return gp_current_task;
 	}
@@ -627,8 +627,6 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
     }
 
     g_num_active_tasks++;
-
-    insert(heap, tcb);
     //scheduler(); do we need to call?
 
 //    if (currently_running()) {
@@ -646,9 +644,29 @@ void k_tsk_exit(void)
 #ifdef DEBUG_0
     printf("k_tsk_exit: entering...\n\r");
 #endif /* DEBUG_0 */
-    
+
+    gp_current_task->state = DORMANT;
+
+    TCB* p_tcb_old = gp_current_task;
+    gp_current_task = scheduler();
+
+    p_tcb_old->state = DORMANT;
+    k_mem_dealloc((void*)p_tcb_old->u_stack_hi);
+
     g_num_active_tasks--;
-    
+    remove_id(heap, p_tcb_old->tid);
+
+    if ( gp_current_task == NULL  ) {
+        gp_current_task = p_tcb_old;        // revert back to the old task
+        return;
+    }
+
+    // at this point, gp_current_task != NULL and p_tcb_old != NULL
+    if (gp_current_task != p_tcb_old) {
+        gp_current_task->state = RUNNING;   // change state of the to-be-switched-in  tcb
+        k_tsk_switch(p_tcb_old);            // switch stacks
+    }
+
     return;
 }
 
@@ -692,9 +710,7 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
             }
         }
 
-    reset_priority(heap, task_id, prio);
-
-    k_tsk_yield();
+        reset_priority(heap, task_id, prio);
     // Need to figure out what "can be pre-empted" means
     // Should calling set_prio switch threads?
         // _tsk_run_new(); // Need to figure out what "can be pre-empted" means

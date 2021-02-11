@@ -96,63 +96,81 @@ void task2(void)
     tsk_exit();
 }
 
+// Function to implement strncat() function in C
+char* strncat(char* destination, const char* source, size_t num)
+{
+    // make ptr point to the end of destination string
+    char* ptr = destination + strlen(destination);
+
+    // Appends characters of source to the destination string
+    while (*source != '\0' && num--)
+        *ptr++ = *source++;
+
+    // null terminate destination string
+    *ptr = '\0';
+
+    // destination string is returned by standard strncat()
+    return destination;
+}
+
+
 void stask0(void)
 {
-	strncat(s_buffer, '0', 1);
+	strncat(s_buffer, "0", 1);
 	tsk_exit();
 }
 
 void stask1(void)
 {
-	strncat(s_buffer, '1', 1);
+	strncat(s_buffer, "1", 1);
 	tsk_exit();
 }
 
 void stask2(void)
 {
-	strncat(s_buffer, '2', 1);
+	strncat(s_buffer, "2", 1);
 	tsk_exit();
 }
 
 void stask3(void)
 {
-	strncat(s_buffer, '3', 1);
+	strncat(s_buffer, "3", 1);
 	tsk_exit();
 }
 
 void stask4(void)
 {
-	strncat(s_buffer, '4', 1);
+	strncat(s_buffer, "4", 1);
 	tsk_exit();
 }
 
 void stask5(void)
 {
-	strncat(s_buffer, '5', 1);
+	strncat(s_buffer, "5", 1);
 	tsk_exit();
 }
 
 void stask6(void)
 {
-	strncat(s_buffer, '6', 1);
+	strncat(s_buffer, "6", 1);
 	tsk_exit();
 }
 
 void stask7(void)
 {
-	strncat(s_buffer, '7', 1);
+	strncat(s_buffer, "7", 1);
 	tsk_exit();
 }
 
 void stask8(void)
 {
-	strncat(s_buffer, '8', 1);
+	strncat(s_buffer, "8", 1);
 	tsk_exit();
 }
 
 void stask9(void)
 {
-	strncat(s_buffer, '9', 1);
+	strncat(s_buffer, "9", 1);
 	tsk_exit();
 }
 
