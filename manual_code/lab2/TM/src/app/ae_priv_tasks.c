@@ -72,11 +72,11 @@ void printResult(int passFail){
     numtests++;
     if(passFail == 1){
         SER_PutStr ("--- Success ---\n\r");
-        result << 1;
-        result += 1;
+//        result << 1;
+//        result += 1;
     } else {
         SER_PutStr ("--- !!! FAILURE !!! ---\n\r");
-        result << 1;
+//        result << 1;
     }
 }
 
@@ -202,7 +202,7 @@ void priv_task_entry(void){
 
     // Testing max_tasks
     for(int i = 3; i < MAX_TASKS; i++){             // 0 is Null Task, 1 is this kernel task
-        k_tsk_create(&tid, &dumdum, LOWEST, 0x200);
+        k_tsk_create(&tid, &dumdum, LOW, 0x200);
     }
 
     SER_PutStr ("Creating Another Task Fails:\n\r");
@@ -214,9 +214,135 @@ void priv_task_entry(void){
     	printf(">>>>>>>>>> TESTS FAILED:  %d <<<<<<<<<<<< \n\r", 2 - result);
     }
 
+    k_tsk_set_prio(gp_current_task->tid, LOWEST);
+    k_tsk_yield();
+
+    // Testing reusability
+    k_tsk_create(&tid, &dumdum, LOW, 0x400);
+    SER_PutStr ("Task id after full yield is 1\n\r");
+    printResult(tid == 2);
+    k_tsk_yield();
+    k_tsk_create(&tid, &dumdum, LOW, 0x400);
+    SER_PutStr ("Task id after full yield is 1\n\r");
+    printResult(tid == 2);
+
     k_tsk_exit();
 }
 
+void reset_scheduling() {
+	for (int i = 0; i < 255; i++) {
+		s_buffer[i] = 0;
+	}
+}
+
+// Function to implement strcmp function
+int strcmp(const char *X, const char *Y)
+{
+    while(*X)
+    {
+        // if characters differ or end of second string is reached
+        if (*X != *Y)
+            break;
+
+        // move to next pair of characters
+        X++;
+        Y++;
+    }
+
+    // return the ASCII difference after converting char* to unsigned char*
+    return *(const unsigned char*)X - *(const unsigned char*)Y;
+}
+
+void priv_tasks_scheduling(void) {
+	/* Test 1:
+	 * Create:
+	 * 3 tasks with high priority,
+	 * 3 tasks with medium priority,
+	 * 3 tasks with low priority,
+	 * 3 tasks with lowest priority
+	 * Expect High 1 high 2 high 3 med 1 med 2 med 3 etc.
+	 *
+	 * Then:
+	 * Create in order of h1, m1, l1, lw1 etc.
+	 *
+	 * Then:
+	 * Create in order of lw1, l1, m1, h1 etc.
+	 *
+	 * Then:
+	 * Create in order of lw3, m2, l1, h3, etc.
+	 *
+	 */
+
+    task_t tid[10];
+
+    reset_scheduling();
+
+    k_tsk_create(&tid[0], &stask0, HIGH, 10000);
+    k_tsk_create(&tid[1], &stask1, HIGH, 10000);
+    k_tsk_create(&tid[2], &stask2, HIGH, 10000);
+    k_tsk_create(&tid[3], &stask3, MEDIUM, 10000);
+    k_tsk_create(&tid[4], &stask4, MEDIUM, 10000);
+    k_tsk_create(&tid[5], &stask5, MEDIUM, 10000);
+    k_tsk_create(&tid[6], &stask6, LOW, 10000);
+    k_tsk_create(&tid[7], &stask7, LOW, 10000);
+    k_tsk_create(&tid[8], &stask8, LOWEST, 10000);
+    k_tsk_create(& tid[9], &stask9, LOWEST, 10000);
+
+    k_tsk_set_prio(gp_current_task->tid, LOWEST);
+
+    k_tsk_yield();
+
+    SER_PutStr("Scheduler output after yielding cpu.\n\r");
+    printResult(strcmp(s_buffer, "0123456789") == 0);
+
+    reset_scheduling();
+
+    k_tsk_create(&tid[0], &stask7, HIGH, 10000);
+    k_tsk_create(&tid[3], &stask2, MEDIUM, 10000);
+    k_tsk_create(&tid[6], &stask9, LOW, 10000);
+    k_tsk_create(&tid[7], &stask1, LOW, 10000);
+    k_tsk_create(&tid[8], &stask0, LOWEST, 10000);
+    k_tsk_create(&tid[4], &stask4, MEDIUM, 10000);
+    k_tsk_create(&tid[5], &stask5, MEDIUM, 10000);
+    k_tsk_create(&tid[1], &stask3, HIGH, 10000);
+    k_tsk_create(&tid[2], &stask6, HIGH, 10000);
+    k_tsk_create(&tid[8], &stask8, LOWEST, 10000);
+
+    k_tsk_set_prio(gp_current_task->tid, LOWEST);
+
+    k_tsk_yield();
+
+    SER_PutStr("Scheduler output after yielding cpu.\n\r");
+    printResult(strcmp(s_buffer, "7362459108") == 0);
+
+    reset_scheduling();
+
+    k_tsk_create(&tid[0], &stask0, HIGH, 10000);
+    k_tsk_create(&tid[1], &stask1, HIGH, 10000);
+    k_tsk_create(&tid[2], &stask2, HIGH, 10000);
+    k_tsk_create(&tid[3], &stask3, MEDIUM, 10000);
+    k_tsk_create(&tid[4], &stask4, MEDIUM, 10000);
+    k_tsk_create(&tid[5], &stask5, MEDIUM, 10000);
+    k_tsk_create(&tid[6], &stask6, LOW, 10000);
+    k_tsk_create(&tid[7], &stask7, LOW, 10000);
+    k_tsk_create(&tid[8], &stask8, LOWEST, 10000);
+    k_tsk_create(& tid[9], &stask9, LOWEST, 10000);
+
+    k_tsk_set_prio(tid[0], LOWEST);
+    k_tsk_set_prio(tid[1], LOWEST);
+    k_tsk_set_prio(tid[2], LOWEST);
+    k_tsk_set_prio(tid[1], MEDIUM);
+
+
+    k_tsk_yield();
+
+    SER_PutStr("Scheduler output after yielding cpu.\n\r");
+    printResult(strcmp(s_buffer, "3451678902") == 0);
+
+    while(1);
+
+    k_tsk_exit();
+}
 
 /**************************************************************************//**
  * @brief       a task that prints AAAAA, BBBBB, CCCCC,...., ZZZZZ on each line.

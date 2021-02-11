@@ -60,6 +60,7 @@ void priv_task1     (void);
 void priv_task2     (void);
 
 void priv_task_entry(void);
+void priv_tasks_scheduling(void);
 
 #endif // ! PRIV_TASKS_H_
 /*
