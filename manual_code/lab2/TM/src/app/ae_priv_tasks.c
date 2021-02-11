@@ -67,9 +67,9 @@
 
 void printResult(int passFail){
     if(passFail == 1){
-        SER_PutStr ("Test Result: Success \n\r");
+        SER_PutStr ("Success\n\r");
     } else {
-        SER_PutStr ("Test Result: Failure \n\r");
+        SER_PutStr ("Failure\n\r");
     }
 }
 
@@ -78,32 +78,89 @@ void priv_task_entry(void){
     RTX_TASK_INFO task_info;
     task_t tid;
 
-    int result = 0;
+    SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 1. tsk_create Failure Test:\n\r");
+    SER_PutStr ("Stack Size Too Small:\n\r");
+    printResult(k_tsk_create(&tid, &dumdum, LOW, 0x100) == RTX_ERR);
+    SER_PutStr ("Stack Size Not 8b Aligned:\n\r");
+    printResult(k_tsk_create(&tid, &dumdum, LOW, 0x401) == RTX_ERR);
+    // SER_PutStr ("Stack Size Too Big:\n\r");
+    // printResult(k_tsk_create(&tid, &dumdum, LOW, 0xFFFFFF00) == RTX_ERR);
+    SER_PutStr ("Prio Invalid:\n\r");
+    printResult(k_tsk_create(&tid, &dumdum, 99, 0x400) == RTX_ERR);
+    SER_PutStr ("Prio Null:\n\r");
+    printResult(k_tsk_create(&tid, &dumdum, PRIO_NULL, 0x400) == RTX_ERR);
+    SER_PutStr ("Null tid:\n\r");
+    printResult(k_tsk_create(NULL, &dumdum, LOW, 0x400) == RTX_ERR);
+    SER_PutStr ("Null task:\n\r");
+    printResult(k_tsk_create(&tid, NULL, LOW, 0x400) == RTX_ERR);
 
-    SER_PutStr ("Stack Size Too Small Test:\n\r");
-    if(k_tsk_create(&tid, &stackTooSmall, LOW, 0x100) == RTX_ERR){
-        printResult(1);
-    } else {
-        printResult(0);
-    }
+    SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 2. tsk_create and tsk_get Function Test:\n\r");
+    k_tsk_create(&tid, &dumdum, LOW, 0x400);
+    SER_PutStr ("Did we get tid 2:\n\r");
+    printResult(tid == 2);          // 0 = NULL_TASK, 1 = Priv Task, 2 = dumdum
+    k_tsk_get(tid, &task_info);
+
+    SER_PutStr ("Compare kStack Size:\n\r");
+    printResult(task_info.k_stack_size == KERN_STACK_SIZE); // 0x200
+    SER_PutStr ("Compare uStack Size:\n\r");
+    printResult(task_info.u_stack_size == 0x400);
+    SER_PutStr ("Compare Task ID:\n\r");
+    printResult(task_info.tid == tid);
+    SER_PutStr ("Compare Priority:\n\r");
+    printResult(task_info.prio == LOW);
+    SER_PutStr ("Compare State:\n\r");
+    printResult(task_info.state == READY);
+    SER_PutStr ("Compare Privilege:\n\r");
+    printResult(task_info.priv == 0);
+    
+    SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 3. tsk_get Failure Test:\n\r");
+    SER_PutStr ("Task ID 0:\n\r");
+    printResult(k_tsk_get(0, &task_info) == RTX_ERR);
+    SER_PutStr ("Null Buffer Task Info:\n\r");
+    printResult(k_tsk_get(tid, NULL) == RTX_ERR);
+    SER_PutStr ("Max Task ID:\n\r");
+    printResult(k_tsk_get(MAX_TASKS, &task_info) == RTX_ERR);
+    SER_PutStr ("Dormant Task 3:\n\r");
+    printResult(k_tsk_get(3, &task_info) == RTX_ERR);
+    SER_PutStr ("Dormant Task Mid:\n\r");
+    printResult(k_tsk_get(MAX_TASKS/2, &task_info) == RTX_ERR);
+
+    SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 4. set_prio Function Test:\n\r");
+    SER_PutStr ("Set user prio:\n\r");
+    k_tsk_set_prio(tid, LOWEST);
+    k_tsk_get(tid, &task_info);
+    printResult(task_info.prio == LOWEST);
+    SER_PutStr ("Set own prio:\n\r");          // Should be setting prio from med to hi
+    k_tsk_set_prio(1, HIGH);
+    k_tsk_get(1, &task_info);
+    printResult(task_info.prio == HIGH);
+
+    SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 5. set_prio Failure Test:\n\r");
+    SER_PutStr ("Task ID 0:\n\r");
+    printResult(k_tsk_set_prio(0, HIGH) == RTX_ERR);
+    SER_PutStr ("Null_Task Prio:\n\r");
+    printResult(k_tsk_set_prio(tid, PRIO_NULL) == RTX_ERR);
+    SER_PutStr ("Max Task ID:\n\r");
+    printResult(k_tsk_set_prio(MAX_TASKS, HIGH) == RTX_ERR);
+    SER_PutStr ("Dormant Task 3:\n\r");
+    printResult(k_tsk_set_prio(3, HIGH) == RTX_ERR);
+    SER_PutStr ("Dormant Task Mid:\n\r");
+    printResult(k_tsk_set_prio(MAX_TASKS/2, HIGH) == RTX_ERR);
+    SER_PutStr ("Undefined Priority:\n\r");
+    printResult(k_tsk_set_prio(tid, 99) == RTX_ERR);
+    // SER_PutStr ("Privilege Check:\n\r"); // THIS IS WILL PASS FOR KERNEL TASK
+    // printResult(k_tsk_set_prio(1, HIGH) == RTX_ERR);
+
+
+    SER_PutStr (">>>>>>>>>>>>>>>>>>>>> 1. tsk_create Stress Function Test:\n\r");
 
     // Testing max_tasks
-    // SER_PutStr ("Maximum Stack Size Test:\n\r");
-    // for(int i = 2; i < MAX_TASKS; i++){             // 0 is Null Task, 1 is this kernel task
-    //     k_tsk_create(&tid, &printTaskID, LOWEST, 0x200);
-    // }
+    for(int i = 3; i < MAX_TASKS; i++){             // 0 is Null Task, 1 is this kernel task
+        k_tsk_create(&tid, &dumdum, LOWEST, 0x200);
+    }
 
-    // if(k_tsk_create(&tid, &printTaskID, LOWEST, 0x200) == RTX_ERR){
-    //     printResult(1);
-    // } else {
-    //     printResult(0);
-    // }
-
-
-    // Testing Priority Stuff
-    // for(int i = 2; i < MAX_TASKS; i++){
-    //     k_tsk_set_prio(&tid, HIGH);
-    // }
+    SER_PutStr ("Creating Another Task Fails:\n\r");
+    printResult(k_tsk_create(&tid, &dumdum, LOW, 0x400) == RTX_ERR);
 
     k_tsk_exit();
 }
