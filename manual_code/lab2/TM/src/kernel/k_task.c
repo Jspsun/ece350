@@ -224,7 +224,7 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
         return RTX_ERR;
     }
 
-    p_tcb ->tid = tid;
+    p_tcb->tid = tid;
     p_tcb->state = READY;
 
     /*---------------------------------------------------------------
@@ -299,6 +299,7 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
     p_tcb->msp = sp;                        // store msp in TCB
     p_tcb->ptask = p_taskinfo->ptask;       // store task entry in TCB
     p_tcb->prio = p_taskinfo->prio;         // store priority in TCB
+    p_tcb->priv = p_taskinfo->priv;         // store privilege in
 
     return RTX_OK;
 }
@@ -421,8 +422,8 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
     }
 
     // stack size too big
-    int ALL_HEAP = RAM_END;
-    int suitable_regions = k_mem_count_extfrag(ALL_HEAP) - k_mem_count_extfrag(stack_size);
+    size_t ALL_HEAP = 0xFFFFFFFF;
+    size_t suitable_regions = k_mem_count_extfrag(ALL_HEAP) - k_mem_count_extfrag(stack_size);
     if (!suitable_regions){
         return RTX_ERR;
     }
@@ -433,7 +434,7 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
     }
 
     // prio invalid
-    if (prio != HIGH || prio != MEDIUM || prio != LOW || prio != LOWEST){
+    if (prio != HIGH && prio != MEDIUM && prio != LOW && prio != LOWEST){
         return RTX_ERR;
     }
 
@@ -445,6 +446,7 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
         // get dormant TCB
         if(g_tcbs[i].state == DORMANT){
             tcb = &g_tcbs[i];
+            break;
         }
     }
     
