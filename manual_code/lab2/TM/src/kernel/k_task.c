@@ -400,6 +400,12 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
     // TODO: check pointers
     // TODO: error checking additional conditions
 
+    // TID pointer NULL
+    if (task == NULL){
+        return RTX_ERR;
+    }
+
+    // Maximum number of tasks reached
     if (g_num_active_tasks == MAX_TASKS){
         return RTX_ERR;
     }
