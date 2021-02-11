@@ -405,6 +405,11 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
         return RTX_ERR;
     }
 
+    // Task entry pointer NULL
+    if (task_entry == NULL){
+        return RTX_ERR;
+    }
+
     // Maximum number of tasks reached
     if (g_num_active_tasks == MAX_TASKS){
         return RTX_ERR;
@@ -422,14 +427,14 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
         return RTX_ERR;
     }
 
-    // prio invalid
-    if (prio != HIGH || prio != MEDIUM || prio != LOW || prio != LOWEST){
+    // stack_size not 8 bytes aligned
+    if (stack_size % 8 != 0){
         return RTX_ERR;
     }
 
-    // stack_size must be 8 bytes aligned
-    if (stack_size % 8 != 0){
-        stack_size = ((U16)(stack_size / 8)) * 8 + 8;
+    // prio invalid
+    if (prio != HIGH || prio != MEDIUM || prio != LOW || prio != LOWEST){
+        return RTX_ERR;
     }
 
     RTX_TASK_INFO task_info;
@@ -497,7 +502,7 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
     }
 
     // valid TID
-    if (task_id > 0 || task_id < MAX_TASKS){
+    if (task_id > 0 && task_id < MAX_TASKS){
         // user-mode task can change prio of any user-mode task
         // user-mode task cannot change prio of kernel task
         // kernel task can change prio of any user-mode or kernel task
@@ -538,7 +543,7 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
     }
 
     // valid TID excluding 0
-    if (task_id > 0 || task_id < MAX_TASKS){
+    if (task_id > 0 && task_id < MAX_TASKS){
         buffer->tid = task_id;
         buffer->prio = g_tcbs[task_id].prio;
         buffer->state = g_tcbs[task_id].state;
