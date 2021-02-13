@@ -693,6 +693,11 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
         return RTX_ERR;
     }
 
+    // valid TID
+    if (!(task_id > 0 && task_id < MAX_TASKS)){
+        return RTX_ERR;
+    }    
+
     // dormant TCB
     if (g_tcbs[task_id].state == DORMANT){
         return RTX_ERR;
@@ -702,30 +707,26 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
     	return RTX_OK;
     }
 
-    // valid TID
-    if (task_id > 0 && task_id < MAX_TASKS){
-        // user-mode task can change prio of any user-mode task
-        // user-mode task cannot change prio of kernel task
-        // kernel task can change prio of any user-mode or kernel task
 
-        if(gp_current_task->priv == 1){
-            g_tcbs[task_id].prio = prio;
+    // user-mode task can change prio of any user-mode task
+    // user-mode task cannot change prio of kernel task
+    // kernel task can change prio of any user-mode or kernel task
+
+    if(gp_current_task->priv == 1){
+        g_tcbs[task_id].prio = prio;
+    } else {
+        if(g_tcbs[task_id].priv == 1){
+            return RTX_ERR;
         } else {
-            if(g_tcbs[task_id].priv == 1){
-                return RTX_ERR;
-            } else {
-                g_tcbs[task_id].prio = prio;
-            }
+            g_tcbs[task_id].prio = prio;
         }
-
-        reset_priority(heap, task_id, prio);
-
-        k_tsk_yield();
-
-        return RTX_OK;
-    }else{
-        return RTX_ERR;
     }
+
+    reset_priority(heap, task_id, prio);
+
+    k_tsk_yield();
+
+    return RTX_OK;
 }
 
 int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
