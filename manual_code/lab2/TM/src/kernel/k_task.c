@@ -739,36 +739,36 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
     if (buffer == NULL) {
         return RTX_ERR;
     }
+    
+    // valid TID excluding 0
+    if (!(task_id > 0 && task_id < MAX_TASKS)){
+        return RTX_ERR;
+    }
+    
     // Dormant TCB
     if (g_tcbs[task_id].state == DORMANT){
         return RTX_ERR;
     }
 
-    // valid TID excluding 0
-    if (task_id > 0 && task_id < MAX_TASKS){
-        buffer->tid = task_id;
-        buffer->prio = g_tcbs[task_id].prio;
-        buffer->state = g_tcbs[task_id].state;
-        buffer->priv = g_tcbs[task_id].priv;
-        buffer->ptask = g_tcbs[task_id].ptask;
-        buffer->k_stack_hi = (U32) (&g_k_stacks[task_id+1]);  // kernel stack hi grows downwards
-        buffer->k_stack_size = KERN_STACK_SIZE;         
-        buffer->u_stack_hi = g_tcbs[task_id].u_stack_hi;
-        buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
+    buffer->tid = task_id;
+    buffer->prio = g_tcbs[task_id].prio;
+    buffer->state = g_tcbs[task_id].state;
+    buffer->priv = g_tcbs[task_id].priv;
+    buffer->ptask = g_tcbs[task_id].ptask;
+    buffer->k_stack_hi = (U32) (&g_k_stacks[task_id+1]);  // kernel stack hi grows downwards
+    buffer->k_stack_size = KERN_STACK_SIZE;         
+    buffer->u_stack_hi = g_tcbs[task_id].u_stack_hi;
+    buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
 
-        buffer->u_sp = * (U32*)((U32) g_tcbs[task_id].msp + 108);
+    buffer->u_sp = * (U32*)((U32) g_tcbs[task_id].msp + 108);
 
-        if (task_id == gp_current_task->tid){
-            int regVal = __current_sp();         // store value of SP register in regVal
-            buffer->k_sp = regVal;
-        }else{
-            buffer->k_sp = (U32) g_tcbs[task_id].msp;
-        }
-        return RTX_OK;
-
+    if (task_id == gp_current_task->tid){
+        int regVal = __current_sp();         // store value of SP register in regVal
+        buffer->k_sp = regVal;
     }else{
-        return RTX_ERR;
-    }     
+        buffer->k_sp = (U32) g_tcbs[task_id].msp;
+    }
+    return RTX_OK;   
 }
 
 int k_tsk_ls(task_t *buf, int count){
