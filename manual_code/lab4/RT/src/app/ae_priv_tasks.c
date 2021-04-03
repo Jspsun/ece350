@@ -43,6 +43,16 @@
 #include "Serial.h"
 #include "printf.h"
 
+void ktask2(void) {
+	SER_PutStr(0, "ktask2: entering \n\r");
+	while (1) {
+		for (int i=0; i < 0xFFFFFF; i++)
+			; // artifical delay
+		
+		SER_PutStr(0, "ktask2: yielding \n\r");
+		k_tsk_yield();
+	}
+}
 
 void ktask1(void) {
 	SER_PutStr(0, "ktask1: entering \n\r");
