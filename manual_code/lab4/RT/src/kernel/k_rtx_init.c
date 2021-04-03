@@ -50,6 +50,12 @@ int k_rtx_init(RTX_TASK_INFO *task_info, int num_tasks)
     UART0_Init();
     // Set HPS0 timer to count down from
     config_hps_timer(0,10000,1,0);
+
+    // Set up system time
+    system_time.sec = 0;
+    system_time.usec = 0;
+
+    // A9 timer: 5ns/CC
     // Set A9 timer to count down from 0xFFFFFFFF every 1 us
     // With this setting, A9 timer resets every ~1.2 hrs
     config_a9_timer(0xFFFFFFFF,1,0,199);

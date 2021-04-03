@@ -52,6 +52,7 @@
  */
 
 extern TCB *gp_current_task;
+extern TIMEVAL system_time;
 
 /*
  *===========================================================================

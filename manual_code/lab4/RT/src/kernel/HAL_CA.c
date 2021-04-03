@@ -231,6 +231,7 @@ void c_IRQ_Handler(void)
 {
 	static unsigned int a9_timer_last = 0xFFFFFFFF; // the initial value of free-running timer
 	unsigned int a9_timer_curr;
+        U32 a9_delta;
 
 	char switch_flag = 0;
 	// Read the ICCIAR from the CPU Interface in the GIC
@@ -242,18 +243,18 @@ void c_IRQ_Handler(void)
 			while(UART0_GetRxDataStatus())	// read while Data Ready is valid
 			{
 				char c = UART0_GetRxData();	// would also clear the interrupt if last character is read
-		        if( (U8) c == 13){
-		        	SER_PutStr(1, "\r\n");
-		        } else {
-			        SER_PutChar(1, c);	// display back
-		        }
+                                if( (U8) c == 13){
+                                        SER_PutStr(1, "\r\n");
+                                } else {
+                                        SER_PutChar(1, c);	// display back
+                                }
 
-	            RTX_MSG_CHAR msg;
-	            msg.hdr.length = sizeof(RTX_MSG_HDR) + 1;
-	            msg.hdr.type = KEY_IN;
-	            msg.data = c;
+                                RTX_MSG_CHAR msg;
+                                msg.hdr.length = sizeof(RTX_MSG_HDR) + 1;
+                                msg.hdr.type = KEY_IN;
+                                msg.data = c;
 
-	            k_send_msg(TID_KCD, &msg);
+                                k_send_msg(TID_KCD, &msg);
 			}
 			switch_flag = 1;
 		}
@@ -266,11 +267,22 @@ void c_IRQ_Handler(void)
 	{
 		timer_clear_irq(0);
 		a9_timer_curr = timer_get_current_val(2);	//get the current value of the free running timer
-		if ((a9_timer_last - a9_timer_curr) > 500000U)
-		{
-			printf("%d ms passed\n", ((a9_timer_last - a9_timer_curr)/1000U));
-			a9_timer_last = a9_timer_curr;
-		}
+                a9_delta = a9_timer_last - a9_timer_curr;       // a9_delta: time elapsed since start of previous HPS0 interrupt
+                
+                // base case: no SVC mode entered, a9_delta ~ 100us
+                // SVC case: a9_delta = ~100us + (time elapsed in SVC mode), a9_delta > 100us
+                system_time.usec = system_time.usec + a9_delta;
+                
+                // update a9_timer_last
+                a9_timer_last = a9_timer_curr;
+
+                // TODO: fix system time to match format for us overflow (1 s = 1,000,000 us)
+
+		// if ((a9_timer_last - a9_timer_curr) > 500000U)
+		// {
+		// 	printf("%d ms passed\n", ((a9_timer_last - a9_timer_curr)/1000U));
+		// 	a9_timer_last = a9_timer_curr;
+		// }
 	}
 	else if(interrupt_ID == HPS_TIMER1_IRQ_ID)
 	{
