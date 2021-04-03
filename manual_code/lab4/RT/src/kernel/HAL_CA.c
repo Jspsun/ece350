@@ -276,7 +276,12 @@ void c_IRQ_Handler(void)
                 // update a9_timer_last
                 a9_timer_last = a9_timer_curr;
 
-                // TODO: fix system time to match format for us overflow (1 s = 1,000,000 us)
+                // fix overflow (1 s = 1,000,000 us)              
+                system_time.sec = system_time.usec / 1000000;
+                system_time.usec = system_time.usec % 1000000;
+
+                // reset A9 timer
+                timer_set_count(2,0xFFFFFFFF);
 
 		// if ((a9_timer_last - a9_timer_curr) > 500000U)
 		// {
