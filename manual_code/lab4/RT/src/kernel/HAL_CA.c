@@ -229,10 +229,6 @@ EXIT_IRQ
 
 void c_IRQ_Handler(void)
 {
-	static unsigned int a9_timer_last = 0xFFFFFFFF; // the initial value of free-running timer
-	// static unsigned int a9_timer_last = 30000000;
-	unsigned int a9_timer_curr;
-        U32 a9_delta;
 
 	char switch_flag = 0;
 	// Read the ICCIAR from the CPU Interface in the GIC
@@ -267,39 +263,6 @@ void c_IRQ_Handler(void)
 	else if(interrupt_ID == HPS_TIMER0_IRQ_ID)
 	{
 		timer_clear_irq(0);
-		a9_timer_curr = timer_get_current_val(2);	//get the current value of the free running timer
-
-		// a9_delta: time elapsed since start of previous HPS0 interrupt
-		if(a9_timer_curr < a9_timer_last){
-			a9_delta = a9_timer_last - a9_timer_curr;
-		} else {
-			a9_delta = a9_timer_last + (0xFFFFFFFF - a9_timer_curr);
-		// a9_delta = a9_timer_last + (30000000 - a9_timer_curr);
-			SER_PutStr(1, "a9 Rolled Over\r\n");
-		}
-
-		system_time.usec = system_time.usec + a9_delta;
-
-		// update a9_timer_last
-		a9_timer_last = a9_timer_curr;
-
-		// fix overflow (1 s = 1,000,000 us)
-		if(system_time.usec > 1000000) {
-			system_time.sec += system_time.usec / 1000000;
-			system_time.usec = system_time.usec % 1000000;
-		}
-
-		system_time.usec = system_time.usec + a9_delta;
-
-		// update a9_timer_last
-		a9_timer_last = a9_timer_curr;
-
-		// fix overflow (1 s = 1,000,000 us)
-		if(system_time.usec > 1000000) {
-			system_time.sec += system_time.usec / 1000000;
-			system_time.usec = system_time.usec % 1000000;
-		}
-
 	}
 	else if(interrupt_ID == HPS_TIMER1_IRQ_ID)
 	{

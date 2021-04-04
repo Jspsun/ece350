@@ -70,6 +70,8 @@ typedef struct rtx_msg_char {
  */
  
 extern TIMEVAL system_time;
+extern void update_system_time(void);
+extern U32 a9_timer_last;
 
  /*
   *===========================================================================
