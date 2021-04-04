@@ -43,6 +43,7 @@
 #include "Serial.h"
 #include "k_mem.h"
 #include "k_task.h"
+#include "common_ext.h"
 
 int k_rtx_init(RTX_TASK_INFO *task_info, int num_tasks)
 {
@@ -59,6 +60,7 @@ int k_rtx_init(RTX_TASK_INFO *task_info, int num_tasks)
     // Set A9 timer to count down from 0xFFFFFFFF every 1 us
     // With this setting, A9 timer resets every ~1.2 hrs
     config_a9_timer(0xFFFFFFFF,1,0,199);
+//    config_a9_timer(30000000,1,0,199);
 
     /* interrupts are already disabled when we enter here */
     if ( k_mem_init() != RTX_OK) {

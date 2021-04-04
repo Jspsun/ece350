@@ -44,9 +44,9 @@
 #include "printf.h"
 
 void ktask2(void) {
-	SER_PutStr(0, "ktask2: entering \n\r");
 	while (1) {
-		for (int i=0; i < 0xFFFFFF; i++)
+		SER_PutStr(0, "ktask2: entering \n\r");
+		for (int i=0; i < 0x2FFFFFF; i++)
 			; // artifical delay
 		
 		SER_PutStr(0, "ktask2: yielding \n\r");

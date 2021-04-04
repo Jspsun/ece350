@@ -50,3 +50,4 @@ manual/*.toc
 *.bak
 *.Bak
 .#*
+.DS_Store

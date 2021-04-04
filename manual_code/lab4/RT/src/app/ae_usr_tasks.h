@@ -42,9 +42,8 @@
 void utask1(void);
 void utask2(void);
 
-void kcd_waiting(void);
-void kcd_reg_and_exit(void);
-void kcd_receive_and_print(void);
+void check_sys_timer(void);
+void check_sys_timer_after_SVC(void);
 
 #endif // ! USR_TASK_H_
 

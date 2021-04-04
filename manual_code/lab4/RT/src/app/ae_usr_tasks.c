@@ -41,10 +41,12 @@
 #include "printf.h"
 
 void check_sys_timer(void){
-	SER_PutStr(0, "check_sys_timer: entering \n\r");
+	printf("check_sys_timer: entering \n\r");
 	while (1) {
-		for (int i=0; i<0xFFFFF; i++)
-			; // artifical delay
+		int a = 0;
+		for (int i=0; i<0xFFFFFF; i++) {
+			a++; // artifical delay
+		}
 
 		printf("system time sec: %d ", system_time.sec);
 		printf("system time usec: %d \n\r", system_time.usec);
@@ -54,12 +56,15 @@ void check_sys_timer(void){
 void check_sys_timer_after_SVC(void){
 	SER_PutStr(0, "check_sys_timer_after_SVC: entering \n\r");
 	while (1) {
-		for (int i=0; i<0xFFFFF; i++)
-			; // artifical delay
+		for(int j = 0; j < 4; j++){
+			int a = 0;
+			for (int i=0; i<0xFFFFFF; i++){
+				a++; // artifical delay
+			}
 
-		printf("system time sec: %d ", system_time.sec);
-		printf("system time usec: %d \n\r", system_time.usec);
-
+			printf("system time sec: %d ", system_time.sec);
+			printf("system time usec: %d \n\r", system_time.usec);
+		}
 		tsk_yield();
 	}
 }
