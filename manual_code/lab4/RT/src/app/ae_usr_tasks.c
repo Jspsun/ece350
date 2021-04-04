@@ -43,14 +43,15 @@
 void check_sys_timer(void){
 	printf("check_sys_timer: entering \n\r");
 	while (1) {
-		int a = 0;
-		for (int i=0; i<0xFFFFFF; i++) {
-			a++; // artifical delay
+//		for(int j = 0; j < 100; j++){
+			int a = 0;
+			for (int i=0; i<0xFFFFFF; i++) {
+				a++; // artifical delay
+			}
+			printf("sec: %d usec: %d\n\r", system_time.sec, system_time.usec);
 		}
-
-		printf("system time sec: %d ", system_time.sec);
-		printf("system time usec: %d \n\r", system_time.usec);
-	}
+//		int wackho = 7;
+//	}
 }
 
 void check_sys_timer_after_SVC(void){
