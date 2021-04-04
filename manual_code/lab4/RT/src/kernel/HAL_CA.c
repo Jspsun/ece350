@@ -267,35 +267,26 @@ void c_IRQ_Handler(void)
 	{
 		timer_clear_irq(0);
 		a9_timer_curr = timer_get_current_val(2);	//get the current value of the free running timer
-<<<<<<< HEAD
-		if ((a9_timer_last - a9_timer_curr) > 500000U)
-		{
-			printf("%d ms passed!\r\n", ((a9_timer_last - a9_timer_curr)/1000U));
-			a9_timer_last = a9_timer_curr;
+
+		// a9_delta: time elapsed since start of previous HPS0 interrupt
+		if(a9_timer_curr < a9_timer_last){
+			a9_delta = a9_timer_last - a9_timer_curr;
+		} else {
+			a9_delta = a9_timer_last + (0xFFFFFFFF - a9_timer_curr);
+		// a9_delta = a9_timer_last + (30000000 - a9_timer_curr);
+			SER_PutStr(1, "a9 Rolled Over\r\n");
 		}
-=======
-                a9_delta = a9_timer_last - a9_timer_curr;       // a9_delta: time elapsed since start of previous HPS0 interrupt
-                
-                // base case: no SVC mode entered, a9_delta ~ 100us
-                // SVC case: a9_delta = ~100us + (time elapsed in SVC mode), a9_delta > 100us
-                system_time.usec = system_time.usec + a9_delta;
-                
-                // update a9_timer_last
-                a9_timer_last = a9_timer_curr;
 
-                // fix overflow (1 s = 1,000,000 us)              
-                system_time.sec = system_time.usec / 1000000;
-                system_time.usec = system_time.usec % 1000000;
+		system_time.usec = system_time.usec + a9_delta;
 
-                // reset A9 timer
-                timer_set_count(2,0xFFFFFFFF);
+		// update a9_timer_last
+		a9_timer_last = a9_timer_curr;
 
-		// if ((a9_timer_last - a9_timer_curr) > 500000U)
-		// {
-		// 	printf("%d ms passed\n", ((a9_timer_last - a9_timer_curr)/1000U));
-		// 	a9_timer_last = a9_timer_curr;
-		// }
->>>>>>> system time initialization and increments
+		// fix overflow (1 s = 1,000,000 us)
+		if(system_time.usec > 1000000) {
+			system_time.sec += system_time.usec / 1000000;
+			system_time.usec = system_time.usec % 1000000;
+		}
 	}
 	else if(interrupt_ID == HPS_TIMER1_IRQ_ID)
 	{

@@ -51,6 +51,7 @@
  *****************************************************************************/
 
 int ae_init(RTX_SYS_INFO *sys_info, RTX_TASK_INFO *task_info, int num_tasks) {
+
 	if (ae_set_sys_info(sys_info) != RTX_OK) {
 		return RTX_ERR;
 	}
@@ -111,22 +112,22 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
     //     tasks[i].priv = 1;
     // }
 
-    // 1. base case: check system time increments properly without entering SVC mode
-    tasks[0].u_stack_size = 0x200;
-    tasks[0].ptask = &check_sys_timer;
-    tasks[0].prio = MEDIUM;
-    tasks[0].priv = 0;
+//    // 1. base case: check system time increments properly without entering SVC mode
+//    tasks[0].u_stack_size = 0x200;
+//    tasks[0].ptask = &check_sys_timer;
+//    tasks[0].prio = MEDIUM;
+//    tasks[0].priv = 0;
 
-    // // 2. SVC case: check system time increments properly after entering SVC mode
-    // tasks[0].u_stack_size = 0x200;
-    // tasks[0].ptask = &check_sys_timer_after_SVC;
-    // tasks[0].prio = MEDIUM;
-    // tasks[0].priv = 0;
+     // 2. SVC case: check system time increments properly after entering SVC mode
+     tasks[0].u_stack_size = 0x200;
+     tasks[0].ptask = &check_sys_timer_after_SVC;
+     tasks[0].prio = MEDIUM;
+     tasks[0].priv = 0;
 
-    // tasks[0].u_stack_size = 0x200;
-    // tasks[0].ptask = &ktask2;
-    // tasks[0].prio = MEDIUM;
-    // tasks[0].priv = 1;
+     tasks[1].u_stack_size = 0x200;
+     tasks[1].ptask = &ktask2;
+     tasks[1].prio = MEDIUM;
+     tasks[1].priv = 1;
 
     return;
 }
