@@ -229,8 +229,8 @@ EXIT_IRQ
 
 void c_IRQ_Handler(void)
 {
-//	static unsigned int a9_timer_last = 0xFFFFFFFF; // the initial value of free-running timer
-	static unsigned int a9_timer_last = 30000000;
+	static unsigned int a9_timer_last = 0xFFFFFFFF; // the initial value of free-running timer
+	// static unsigned int a9_timer_last = 30000000;
 	unsigned int a9_timer_curr;
         U32 a9_delta;
 
@@ -244,7 +244,6 @@ void c_IRQ_Handler(void)
 			while(UART0_GetRxDataStatus())	// read while Data Ready is valid
 			{
 				char c = UART0_GetRxData();	// would also clear the interrupt if last character is read
-<<<<<<< HEAD
                                 if( (U8) c == 13){
                                         SER_PutStr(1, "\r\n");
                                 } else {
@@ -257,20 +256,6 @@ void c_IRQ_Handler(void)
                                 msg.data = c;
 
                                 k_send_msg(TID_KCD, &msg);
-=======
-				if( (U8) c == 13){
-						SER_PutStr(1, "\r\n");
-				} else {
-						SER_PutChar(1, c);	// display back
-				}
-
-				RTX_MSG_CHAR msg;
-				msg.hdr.length = sizeof(RTX_MSG_HDR) + 1;
-				msg.hdr.type = KEY_IN;
-				msg.data = c;
-
-				k_send_msg(TID_KCD, &msg);
->>>>>>> a7b1d48e2a62f621b78d89a9684cd3a848cd59b6
 			}
 			switch_flag = 1;
 		}
@@ -291,7 +276,6 @@ void c_IRQ_Handler(void)
 			a9_delta = a9_timer_last + (0xFFFFFFFF - a9_timer_curr);
 		// a9_delta = a9_timer_last + (30000000 - a9_timer_curr);
 			SER_PutStr(1, "a9 Rolled Over\r\n");
-<<<<<<< HEAD
 		}
 
 		system_time.usec = system_time.usec + a9_delta;
@@ -303,8 +287,6 @@ void c_IRQ_Handler(void)
 		if(system_time.usec > 1000000) {
 			system_time.sec += system_time.usec / 1000000;
 			system_time.usec = system_time.usec % 1000000;
-=======
->>>>>>> a7b1d48e2a62f621b78d89a9684cd3a848cd59b6
 		}
 
 		system_time.usec = system_time.usec + a9_delta;
