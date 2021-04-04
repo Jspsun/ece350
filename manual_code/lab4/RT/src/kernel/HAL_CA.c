@@ -263,6 +263,7 @@ void c_IRQ_Handler(void)
 	else if(interrupt_ID == HPS_TIMER0_IRQ_ID)
 	{
 		timer_clear_irq(0);
+                update_system_time();
 	}
 	else if(interrupt_ID == HPS_TIMER1_IRQ_ID)
 	{
