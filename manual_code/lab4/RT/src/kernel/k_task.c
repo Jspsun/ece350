@@ -68,7 +68,7 @@ TCB             g_tcbs[MAX_TASKS];			// an array of TCBs
 RTX_TASK_INFO   g_null_task_info;			// The null task info
 U32             g_num_active_tasks = 0;		// number of non-dormant tasks
 
-static TIMEVAL	system_time;
+TIMEVAL	system_time;
 unsigned int a9_timer_last = 0xFFFFFFFF; // the initial value of free-running timer
 
 unsigned int a9_timer_curr;
