@@ -68,7 +68,7 @@ TCB             g_tcbs[MAX_TASKS];			// an array of TCBs
 RTX_TASK_INFO   g_null_task_info;			// The null task info
 U32             g_num_active_tasks = 0;		// number of non-dormant tasks
 
-TIMEVAL	system_time;
+static TIMEVAL	system_time;
 unsigned int a9_timer_last = 0xFFFFFFFF; // the initial value of free-running timer
 
 unsigned int a9_timer_curr;
@@ -140,28 +140,27 @@ int compare_timeval(TIMEVAL t1, TIMEVAL t2) {
 	return t1.sec < t2.sec || (t1.sec == t2.sec && t1.usec < t2.usec);
 }
 
-void update_system_time(void){
+TIMEVAL get_system_time(void){
     a9_timer_curr = timer_get_current_val(2);	//get the current value of the free running timer
-
+    
     // a9_delta: time elapsed since start of previous HPS0 interrupt
     if(a9_timer_curr < a9_timer_last){
         a9_delta = a9_timer_last - a9_timer_curr;
     } else {
         a9_delta = a9_timer_last + (0xFFFFFFFF - a9_timer_curr);
-    // a9_delta = a9_timer_last + (30000000 - a9_timer_curr);
-        SER_PutStr(1, "a9 Rolled Over\r\n");
     }
 
-    system_time.usec = system_time.usec + a9_delta;
-
-    // update a9_timer_last
-    a9_timer_last = a9_timer_curr;
+    TIMEVAL curr_time;
+    curr_time.sec = system_time.sec;
+    curr_time.usec = system_time.usec + a9_delta;
 
     // fix overflow (1 s = 1,000,000 us)
-    if(system_time.usec > 1000000) {
-        system_time.sec += system_time.usec / 1000000;
-        system_time.usec = system_time.usec % 1000000;
+    if(curr_time.usec > 1000000) {
+        curr_time.sec += curr_time.usec / 1000000;
+        curr_time.usec = curr_time.usec % 1000000;
     }
+
+    return curr_time;
 }
 
 /*
