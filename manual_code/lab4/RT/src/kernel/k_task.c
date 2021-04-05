@@ -160,49 +160,24 @@ TIMEVAL get_system_time(void){
         curr_time.usec = curr_time.usec % 1000000;
     }
 
+    system_time = curr_time;
+
     return curr_time;
 }
 
-/*
- *==========================================================================
- *                            EDF VARIABLES
- *==========================================================================
- */
-
-typedef struct edf_task_rt {
-	TASK_RT info;
-	TIMEVAL deadline;
-	int flag; // if flag is -1, not in use.
-} EDF_TASK_RT;
-
-static EDF_TASK_RT edf_array[MAX_TASKS];
-
-/*
- *===========================================================================
- *                            EDF FUNCTIONS
- *===========================================================================
- */
-
-void edf_insert(task_t tid, TASK_RT info) {
-	if (edf_array[tid].flag > 0) {
-		// this is really bad
+TIMEVAL next_quanta(TIMEVAL time) {
+	if (time.usec % 100 == 0) {
+		return time;
 	}
 
-	edf_array[tid].info = info;
-
-	// TODO: fix this to use the timers
-	edf_array[tid].deadline.sec = 0;
-	edf_array[tid].deadline.usec = 0;
-
-	edf_array[tid].flag = 0;
-}
-
-void edf_remove(task_t tid) {
-	if (edf_array[tid].flag < 0) {
-		// this is really bad
+	if (time.usec / 100 == 9) {
+		TIMEVAL ret = {time.sec + 1, 0 };
+		return ret;
 	}
 
-	edf_array[tid].flag = -1;
+	TIMEVAL ret = {time.sec, time.usec + 100 - time.usec % 100};
+
+	return ret;
 }
 
 /*
@@ -215,6 +190,139 @@ static const int h_array_size = MAX_TASKS;
 static TCB* heap[h_array_size];
 static U32 current_size = 0;
 static U32 g_task_count = 0;
+
+/*
+ *==========================================================================
+ *                            EDF VARIABLES
+ *==========================================================================
+ */
+
+typedef struct edf_task_rt {
+	TASK_RT info;
+	TIMEVAL deadline;
+	TIMEVAL wakeup_time;
+	int suspended;
+	int flag; // if flag is 0, not in use.
+	int job_count;
+} EDF_TASK_RT;
+
+static EDF_TASK_RT edf_array[MAX_TASKS];
+
+/*
+ *===========================================================================
+ *                            EDF FUNCTIONS
+ *===========================================================================
+ */
+
+extern int insert(TCB* heap[], TCB* value);
+
+void edf_missed_deadline(task_t tid, int job_count) {
+	printf("Job %d of task %d missed deadline\n\r", job_count, tid);
+}
+
+void edf_insert(task_t tid, TASK_RT info) {
+	if (edf_array[tid].flag == 0) {
+		// this is really bad
+	}
+
+	TIMEVAL time = get_system_time();
+	TIMEVAL wakeup = next_quanta(time);
+	edf_array[tid].info = info;
+
+	// TODO: fix this to use the timers
+	edf_array[tid].deadline.sec = wakeup.sec + info.p_n.sec;
+	edf_array[tid].deadline.usec = wakeup.usec + info.p_n.usec;
+	edf_array[tid].wakeup_time = wakeup;
+	edf_array[tid].flag = 1;
+	edf_array[tid].job_count = 0;
+
+	if (wakeup.usec <= time.usec) {
+		// Start running right away
+		insert(heap, &g_tcbs[tid]);
+		edf_array[tid].suspended = 0;
+	} else {
+		edf_array[tid].suspended = 1;
+	}
+
+}
+
+void edf_remove(task_t tid) {
+	if (edf_array[tid].flag == 0) {
+		// this is really bad
+	}
+
+	edf_array[tid].suspended = 0;
+	edf_array[tid].flag = 0;
+	edf_array[tid].job_count = 0;
+}
+
+void edf_suspend(task_t tid, TIMEVAL suspend_time) {
+	if (edf_array[tid].flag == 0) {
+
+	}
+
+	TIMEVAL time = get_system_time();
+	TIMEVAL new_wakeup = {time.sec + suspend_time.sec, time.usec + suspend_time.usec};
+
+	edf_array[tid].suspended = 1;
+	g_tcbs[tid].state = SUSPENDED;
+	edf_array[tid].wakeup_time = new_wakeup;
+
+	if (compare_timeval(edf_array[tid].deadline, new_wakeup)) {
+		edf_array[tid].deadline.sec = edf_array[tid].deadline.sec + edf_array[tid].info.p_n.sec;
+		edf_array[tid].deadline.sec = edf_array[tid].deadline.usec + edf_array[tid].info.p_n.usec;
+		edf_array[tid].job_count += 1;
+
+		edf_missed_deadline(tid, edf_array[tid].job_count);
+	}
+}
+
+void edf_done(task_t tid) {
+	if (edf_array[tid].flag == 0) {
+
+	}
+
+	TIMEVAL time = get_system_time();
+	edf_array[tid].job_count += 1;
+
+	if (compare_timeval(time, edf_array[tid].deadline)) {
+		// missed deadline, reinsert and try running right away
+		edf_array[tid].deadline.sec = edf_array[tid].deadline.sec + edf_array[tid].info.p_n.sec;
+		edf_array[tid].deadline.usec = edf_array[tid].deadline.usec + edf_array[tid].info.p_n.usec;
+		TCB* tcb = &g_tcbs[tid];
+		tcb->state = READY;
+		insert(heap, tcb);
+
+		edf_missed_deadline(tid, edf_array[tid].job_count);
+	}
+
+	// suspend
+
+	g_tcbs[tid].state = SUSPENDED;
+	edf_array[tid].suspended = 1;
+	edf_array[tid].wakeup_time = edf_array[tid].deadline;
+	edf_array[tid].deadline.sec = edf_array[tid].deadline.sec + edf_array[tid].info.p_n.sec;
+	edf_array[tid].deadline.usec = edf_array[tid].deadline.usec + edf_array[tid].info.p_n.usec;
+}
+
+int edf_wakeup(TIMEVAL curr_time) {
+
+	int wakeup_flag = 0;
+	for (int i = 0; i < MAX_TASKS; i++) {
+		if (!edf_array[i].flag || !edf_array[i].suspended) { continue; }
+
+		TIMEVAL wake_up_time = edf_array[i].wakeup_time;
+
+		if (compare_timeval(wake_up_time, curr_time)) {
+			wakeup_flag = 1;
+			TCB* tcb = &g_tcbs[i];
+			tcb->state = READY;
+			insert(heap, tcb);
+		}
+	}
+
+	return wakeup_flag;
+}
 
 /*
  *===========================================================================
@@ -863,7 +971,7 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
     // TODO: if try to set null task to prio PRIO_NULL, do I let it or error?
 
     // prio invalid or PRIO_NULL
-    if (prio != HIGH && prio != MEDIUM && prio != LOW && prio != LOWEST){
+    if (prio == PRIO_RT || g_tcbs[task_id].prio == PRIO_RT){
         return RTX_ERR;
     }
 
@@ -1058,8 +1166,7 @@ void k_tsk_done_rt(void) {
     k_tsk_get(gp_current_task->tid, &info);
 
     // TODO: logic for suspended
-    gp_current_task->state = SUSPENDED;
-    suspend(gp_current_task->tid, rt_info.deadline);
+    edf_done(gp_current_task->tid);
 
     U32* sp = (U32*)info.k_stack_hi;;
 
@@ -1097,8 +1204,7 @@ void k_tsk_suspend(struct timeval_rt *tv)
 #endif /* DEBUG_0 */
     if ((tv->sec == 0 && tv->usec == 0) || tv->usec % 500 != 0) { return; }
 
-    gp_current_task->state = SUSPENDED;
-    suspend(gp_current_task->tid, *tv);
+    edf_suspend(gp_current_task->tid, *tv);
 
     k_tsk_run_new();
 

@@ -288,6 +288,8 @@ void c_IRQ_Handler(void)
 			system_time.sec += system_time.usec / 1000000;
 			system_time.usec = system_time.usec % 1000000;
 		}
+
+		switch_flag = edf_wakeup(system_time);
 	}
 	else if(interrupt_ID == HPS_TIMER1_IRQ_ID)
 	{

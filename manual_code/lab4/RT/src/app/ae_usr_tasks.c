@@ -70,54 +70,44 @@ void check_sys_timer_after_SVC(void){
 	}
 }
 
+static int counter = 0;
+
+void rtask1(void)
+{
+	SER_PutStr(0, "utask2: entering \n\r");
+
+	counter += 1;
+	int a = 0;
+	int delay = counter % 3 == 0 ? 0xFFFFFF : 0x1FFFFFF;
+
+	for (int i=0; i < delay; i++) {
+		a++; // artifical delay
+	}
+
+	printf("utask2: done, %d \n\r", counter);
+
+	tsk_done_rt();
+}
 
 /**
  * @brief: a dummy task1
  */
 void utask1(void)
 {
-	SER_PutStr(0, "utask1: entering \n\r");
-	/* do something */
-	long int x = 0;
-	int i = 0;
-	int j = 0;
-	while (1) {
-		SER_PutStr(0, "utask1: ");
-		char out_char = 'a' + i % 10;
-		for (j = 0; j < 5; j++)
-		{
-			SER_PutChar(0, out_char);
-		}
-		SER_PutStr(0, "\n\r");
-		++i;
-		for (x = 0; x < 5000000; x++)
-			; // some artifical delay
-	}
-	/* terminating */
-	// tsk_exit();
-}
+	TIMEVAL deadline = {0, 500};
+	TASK_RT info = {deadline,  rtask1, PROC_STACK_SIZE, MIN_MBX_SIZE};
+	task_t tid;
+	tsk_create_rt(&tid, &info);
 
-void utask2(void)
-{
-	SER_PutStr(0, "utask2: entering \n\r");
-	/* do something */
-	long int x = 0;
-	int i = 0;
-	int j = 0;
-	while (1)
-	{
-		SER_PutStr(0, "utask2: ");
-		char out_char = 'A' + i % 10;
-		for (j = 0; j < 5; j++) {
-			SER_PutChar(0, out_char);
+	while(1) {
+		SER_PutStr(0, "utask1: entering \n\r");
+		int a = 0;
+		for (int i=0; i<0xFFFFFF; i++) {
+			a++; // artifical delay
 		}
-		SER_PutStr(0, "\n\r");
-		++i;
-		for (x = 0; x < 5000000; x++)
-			; // some artifical delay
+		printf("task1, sec: %d usec: %d\n\r", system_time.sec, system_time.usec);
 	}
-	/* terminating */
-	// tsk_exit();
+
 }
 
 /*

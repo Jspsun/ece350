@@ -44,6 +44,7 @@
 #include "printf.h"
 
 void ktask2(void) {
+	k_tsk_exit();
 	while (1) {
 		SER_PutStr(0, "ktask2: entering \n\r");
 		for (int i=0; i < 0x2FFFFFF; i++)

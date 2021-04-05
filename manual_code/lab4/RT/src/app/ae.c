@@ -120,7 +120,7 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 
      // 2. SVC case: check system time increments properly after entering SVC mode
      tasks[0].u_stack_size = 0x200;
-     tasks[0].ptask = &check_sys_timer_after_SVC;
+     tasks[0].ptask = &utask1;
      tasks[0].prio = MEDIUM;
      tasks[0].priv = 0;
 
