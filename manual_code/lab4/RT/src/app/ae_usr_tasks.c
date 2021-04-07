@@ -75,14 +75,15 @@ static int counter = 0;
 void rtask1(void)
 {
 	SER_PutStr(0, "utask2: entering \n\r");
+	printf("task2, sec: %d usec: %d\n\r", system_time.sec, system_time.usec);
 
 	counter += 1;
-	int a = 0;
-	int delay = counter % 3 == 0 ? 0xFFFFFF : 0x1FFFFFF;
-
-	for (int i=0; i < delay; i++) {
-		a++; // artifical delay
-	}
+//	int a = 0;
+//	int delay = counter % 3 == 0 ? 0xFFFFFF : 0x1FFFFFF;
+//
+//	for (int i=0; i < delay; i++) {
+//		a++; // artifical delay
+//	}
 
 	printf("utask2: done, %d \n\r", counter);
 
@@ -94,7 +95,7 @@ void rtask1(void)
  */
 void utask1(void)
 {
-	TIMEVAL deadline = {0, 500};
+	TIMEVAL deadline = {0, 500000};
 	TASK_RT info = {deadline,  rtask1, PROC_STACK_SIZE, MIN_MBX_SIZE};
 	task_t tid;
 	tsk_create_rt(&tid, &info);

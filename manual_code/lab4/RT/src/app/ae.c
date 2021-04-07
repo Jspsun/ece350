@@ -124,11 +124,6 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
      tasks[0].prio = MEDIUM;
      tasks[0].priv = 0;
 
-     tasks[1].u_stack_size = 0x200;
-     tasks[1].ptask = &ktask2;
-     tasks[1].prio = MEDIUM;
-     tasks[1].priv = 1;
-
     return;
 }
 

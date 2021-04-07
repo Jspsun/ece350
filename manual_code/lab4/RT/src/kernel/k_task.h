@@ -44,6 +44,7 @@
 
 #include "k_inc.h"
 #include "k_HAL_CA.h"
+#include "k_event_queue.h"
 
 /*
  *==========================================================================
@@ -84,5 +85,9 @@ void k_tsk_done_rt      (void);
 void k_tsk_suspend      (struct timeval_rt *tv);
 
 void wake_up(TIMEVAL curr_time);
+int insert(TCB* value);
+TIMEVAL increment_tv(TIMEVAL t1, TIMEVAL t2);
+int compare_timeval(TIMEVAL t1, TIMEVAL t2);
+static TCB* heap[MAX_TASKS];
 
 #endif // ! K_TASK_H_

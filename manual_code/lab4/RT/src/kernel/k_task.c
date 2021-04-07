@@ -52,9 +52,10 @@
 #include "Serial.h"
 #include "k_task.h"
 #include "k_rtx.h"
+#include "printf.h"
 
 #ifdef DEBUG_0
-#include "printf.h"
+//#include "printf.h"
 #endif /* DEBUG_0 */
 
 /*
@@ -137,7 +138,17 @@ The memory map of the OS image may look like the following:
 
 // returns 1 if t1 is earlier than t2
 int compare_timeval(TIMEVAL t1, TIMEVAL t2) {
-	return t1.sec < t2.sec || (t1.sec == t2.sec && t1.usec < t2.usec);
+	return t1.sec < t2.sec || (t1.sec == t2.sec && t1.usec <= t2.usec);
+}
+
+TIMEVAL increment_tv(TIMEVAL t1, TIMEVAL t2) {
+	TIMEVAL t = {t1.sec + t2.sec, t1.usec + t2.usec};
+	if (t.usec > 1000000) {
+		t.sec ++;
+		t.usec = t.usec % 1000000;
+	}
+
+	return t;
 }
 
 TIMEVAL get_system_time(void){
@@ -170,8 +181,8 @@ TIMEVAL next_quanta(TIMEVAL time) {
 		return time;
 	}
 
-	if (time.usec / 100 == 9) {
-		TIMEVAL ret = {time.sec + 1, 0 };
+	if (time.usec + 100 >= 1000000) {
+		TIMEVAL ret = {time.sec + 1, time.usec + 100 - 10000000 };
 		return ret;
 	}
 
@@ -187,26 +198,8 @@ TIMEVAL next_quanta(TIMEVAL time) {
  */
 
 static const int h_array_size = MAX_TASKS;
-static TCB* heap[h_array_size];
 static U32 current_size = 0;
 static U32 g_task_count = 0;
-
-/*
- *==========================================================================
- *                            EDF VARIABLES
- *==========================================================================
- */
-
-typedef struct edf_task_rt {
-	TASK_RT info;
-	TIMEVAL deadline;
-	TIMEVAL wakeup_time;
-	int suspended;
-	int flag; // if flag is 0, not in use.
-	int job_count;
-} EDF_TASK_RT;
-
-static EDF_TASK_RT edf_array[MAX_TASKS];
 
 /*
  *===========================================================================
@@ -214,114 +207,67 @@ static EDF_TASK_RT edf_array[MAX_TASKS];
  *===========================================================================
  */
 
-extern int insert(TCB* heap[], TCB* value);
-
-void edf_missed_deadline(task_t tid, int job_count) {
-	printf("Job %d of task %d missed deadline\n\r", job_count, tid);
-}
-
 void edf_insert(task_t tid, TASK_RT info) {
-	if (edf_array[tid].flag == 0) {
-		// this is really bad
-	}
 
 	TIMEVAL time = get_system_time();
 	TIMEVAL wakeup = next_quanta(time);
 	edf_array[tid].info = info;
 
 	// TODO: fix this to use the timers
-	edf_array[tid].deadline.sec = wakeup.sec + info.p_n.sec;
-	edf_array[tid].deadline.usec = wakeup.usec + info.p_n.usec;
-	edf_array[tid].wakeup_time = wakeup;
-	edf_array[tid].flag = 1;
+	edf_array[tid].deadline = increment_tv(wakeup, info.p_n);
 	edf_array[tid].job_count = 0;
+	edf_array[tid].deadline_count = 0;
+
+	create_deadline(tid, info.p_n, wakeup);
 
 	if (wakeup.usec <= time.usec) {
 		// Start running right away
-		insert(heap, &g_tcbs[tid]);
+		insert(&g_tcbs[tid]);
 		edf_array[tid].suspended = 0;
 	} else {
 		edf_array[tid].suspended = 1;
+		event_suspend(tid, wakeup);
 	}
 
 }
 
 void edf_remove(task_t tid) {
-	if (edf_array[tid].flag == 0) {
-		// this is really bad
-	}
-
 	edf_array[tid].suspended = 0;
-	edf_array[tid].flag = 0;
 	edf_array[tid].job_count = 0;
+	event_remove(tid);
 }
 
 void edf_suspend(task_t tid, TIMEVAL suspend_time) {
-	if (edf_array[tid].flag == 0) {
-
-	}
 
 	TIMEVAL time = get_system_time();
-	TIMEVAL new_wakeup = {time.sec + suspend_time.sec, time.usec + suspend_time.usec};
+	TIMEVAL new_wakeup = increment_tv(time, suspend_time);
 
 	edf_array[tid].suspended = 1;
 	g_tcbs[tid].state = SUSPENDED;
-	edf_array[tid].wakeup_time = new_wakeup;
-
-	if (compare_timeval(edf_array[tid].deadline, new_wakeup)) {
-		edf_array[tid].deadline.sec = edf_array[tid].deadline.sec + edf_array[tid].info.p_n.sec;
-		edf_array[tid].deadline.sec = edf_array[tid].deadline.usec + edf_array[tid].info.p_n.usec;
-		edf_array[tid].job_count += 1;
-
-		edf_missed_deadline(tid, edf_array[tid].job_count);
-	}
+	event_suspend(tid, new_wakeup);
 }
 
-void edf_done(task_t tid) {
-	if (edf_array[tid].flag == 0) {
-
-	}
-
+int edf_done(task_t tid) {
 	TIMEVAL time = get_system_time();
 	edf_array[tid].job_count += 1;
 
-	if (compare_timeval(time, edf_array[tid].deadline)) {
+	if (edf_array[tid].job_count <= edf_array[tid].deadline_count) {
 		// missed deadline, reinsert and try running right away
-		edf_array[tid].deadline.sec = edf_array[tid].deadline.sec + edf_array[tid].info.p_n.sec;
-		edf_array[tid].deadline.usec = edf_array[tid].deadline.usec + edf_array[tid].info.p_n.usec;
+		edf_array[tid].deadline = increment_tv(edf_array[tid].deadline, edf_array[tid].info.p_n);
 		TCB* tcb = &g_tcbs[tid];
 		tcb->state = READY;
-		insert(heap, tcb);
-
-		edf_missed_deadline(tid, edf_array[tid].job_count);
+		printf("Missed deadline for job %d, task %d\n\r", edf_array[tid].job_count, tid);
+		insert(tcb);
+		return 1;
 	}
-
 	// suspend
 
 	g_tcbs[tid].state = SUSPENDED;
 	edf_array[tid].suspended = 1;
-	edf_array[tid].wakeup_time = edf_array[tid].deadline;
-	edf_array[tid].deadline.sec = edf_array[tid].deadline.sec + edf_array[tid].info.p_n.sec;
-	edf_array[tid].deadline.usec = edf_array[tid].deadline.usec + edf_array[tid].info.p_n.usec;
-}
+	event_suspend(tid, edf_array[tid].deadline);
+	edf_array[tid].deadline = increment_tv(edf_array[tid].deadline, edf_array[tid].info.p_n);
 
-int edf_wakeup(TIMEVAL curr_time) {
-
-	int wakeup_flag = 0;
-	for (int i = 0; i < MAX_TASKS; i++) {
-		if (!edf_array[i].flag || !edf_array[i].suspended) { continue; }
-
-		TIMEVAL wake_up_time = edf_array[i].wakeup_time;
-
-		if (compare_timeval(wake_up_time, curr_time)) {
-			wakeup_flag = 1;
-			TCB* tcb = &g_tcbs[i];
-			tcb->state = READY;
-			insert(heap, tcb);
-		}
-	}
-
-	return wakeup_flag;
+	return 0;
 }
 
 /*
@@ -345,6 +291,8 @@ int compare_rt(TCB *t1, TCB* t2) {
 }
 
 int compare(TCB *t1, TCB* t2) {
+	if (t1 == t2) { return 1; }
+
 	if (t1->prio == PRIO_RT && t2->prio == PRIO_RT) {
 		return compare_rt(t1, t2);
 	}
@@ -401,7 +349,7 @@ void decrease_key(TCB* heap[], int i) {
     }
 }
 
-int insert(TCB* heap[], TCB* value) {
+int insert(TCB* value) {
     if (current_size + 1== h_array_size) {
         return -1;
     }
@@ -476,40 +424,6 @@ void remove_id(TCB* heap[], U8 tid) {
 
 /*
  *===========================================================================
- *                        SUSPENDED FUNCTIONS
- *===========================================================================
- */
-
-typedef struct suspended_task_info {
-	TIMEVAL wake_up_time;
-	int valid_flag; // if flag is -1, not in use
-} SUSPENDED_TASK_INFO;
-
-static SUSPENDED_TASK_INFO sus_array[MAX_TASKS];
-
-void suspend(task_t tid, TIMEVAL wake_up_time) {
-	sus_array[tid].wake_up_time = wake_up_time;
-	sus_array[tid].valid_flag = 0;
-}
-
-void wake_up(TIMEVAL curr_time) {
-	for (int i = 0; i < MAX_TASKS; i++) {
-		if (sus_array[i].valid_flag < 0) { continue; }
-
-		TIMEVAL wake_up_time = sus_array[i].wake_up_time;
-
-		if (compare_timeval(wake_up_time, curr_time)) {
-			TCB* tcb = &g_tcbs[i];
-			tcb->state = READY;
-			insert(heap, tcb);
-			EDF_TASK_RT info = edf_array[i];
-			// Maybe update deadline??
-		}
-	}
-}
-
-/*
- *===========================================================================
  *                            FUNCTIONS
  *===========================================================================
  */
@@ -547,8 +461,8 @@ TCB *scheduler(void)
 	gp_current_task = max_ready_tcb;
     extract_max(heap);
 
-    if (current_tcb->state != BLK_MSG && current_tcb->state != SUSPENDED) {
-    	insert(heap, current_tcb);
+    if (current_tcb->state != BLK_MSG && current_tcb->prio != PRIO_RT) {
+    	insert(current_tcb);
     }
 
     return gp_current_task;
@@ -747,7 +661,9 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
     p_tcb->priv = p_taskinfo->priv;         // store privilege in
     p_tcb->mailbox = 0;
 
-    insert(heap, p_tcb);
+    if (p_tcb->prio != PRIO_RT) {
+        insert(p_tcb);
+    }
 
     return RTX_OK;
 }
@@ -1090,7 +1006,7 @@ void k_tsk_unblock (TCB *task) {
 	    // We move this preempted task to the front of the ready queue
 	    // We do not change the fifo counter of the preempted task
 	    // So it should remain at the front
-	    insert(heap, p_tcb_old);
+	    insert(p_tcb_old);
 
 	    // at this point, gp_current_task != NULL and p_tcb_old != NULL
 	    if (gp_current_task != p_tcb_old) {
@@ -1103,7 +1019,7 @@ void k_tsk_unblock (TCB *task) {
 		// We increment fifo counter so it explicitly goes to the back
 		g_task_count++;
 		task->task_count = g_task_count;
-		insert(heap, task);
+		insert(task);
 	}
 
 	return;
