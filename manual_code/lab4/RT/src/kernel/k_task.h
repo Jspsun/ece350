@@ -86,6 +86,7 @@ void k_tsk_suspend      (struct timeval_rt *tv);
 
 void wake_up(TIMEVAL curr_time);
 int insert(TCB* value);
+int compare(TCB *t1, TCB* t2);
 TIMEVAL increment_tv(TIMEVAL t1, TIMEVAL t2);
 int compare_timeval(TIMEVAL t1, TIMEVAL t2);
 TIMEVAL next_quanta(TIMEVAL time);

@@ -177,6 +177,18 @@ void event_remove(task_t tid) {
  *===========================================================================
  */
 
+int compare_rt(TCB *t1, TCB* t2) {
+	if (t1->prio != PRIO_RT || t2->prio != PRIO_RT) {
+		return compare(t1, t2);
+	}
+
+	EDF_TASK_RT rt1 = edf_array[t1->tid];
+	EDF_TASK_RT rt2 = edf_array[t2->tid];
+
+	// TODO: compare rt1 and rt2 using info + last_run
+	return compare_timeval(rt1.deadline, rt2.deadline);
+}
+
 void edf_insert(task_t tid, TASK_RT info) {
 
 	TIMEVAL time = get_system_time();
