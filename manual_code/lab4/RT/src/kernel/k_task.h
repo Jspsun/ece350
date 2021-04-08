@@ -88,6 +88,7 @@ void wake_up(TIMEVAL curr_time);
 int insert(TCB* value);
 TIMEVAL increment_tv(TIMEVAL t1, TIMEVAL t2);
 int compare_timeval(TIMEVAL t1, TIMEVAL t2);
+TIMEVAL next_quanta(TIMEVAL time);
 static TCB* heap[MAX_TASKS];
 
 #endif // ! K_TASK_H_

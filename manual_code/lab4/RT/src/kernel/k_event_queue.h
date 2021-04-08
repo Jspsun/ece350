@@ -6,6 +6,8 @@
  */
 
 #include "k_task.h"
+#include "printf.h"
+#include "Serial.h"
 
 #ifndef SRC_KERNEL_K_EVENT_QUEUE_H_
 #define SRC_KERNEL_K_EVENT_QUEUE_H_
@@ -15,6 +17,9 @@
  *                            EDF VARIABLES
  *==========================================================================
  */
+
+extern TIMEVAL system_time;
+extern TIMEVAL get_system_time(void);
 
 typedef struct Event {
 	int type;
@@ -37,6 +42,10 @@ void event_remove(task_t tid);
 void event_suspend(task_t tid, TIMEVAL wake_up);
 int update(TIMEVAL time);
 void create_deadline(task_t tid, TIMEVAL p_n, TIMEVAL start);
+void edf_insert(task_t tid, TASK_RT info);
+void edf_suspend(task_t tid, TIMEVAL suspend_time);
+void edf_remove(task_t tid);
+int edf_done(task_t tid);
 
 
 #endif /* SRC_KERNEL_K_EVENT_QUEUE_H_ */

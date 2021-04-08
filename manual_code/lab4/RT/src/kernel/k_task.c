@@ -151,7 +151,7 @@ TIMEVAL increment_tv(TIMEVAL t1, TIMEVAL t2) {
 	return t;
 }
 
-TIMEVAL get_system_time(void){
+TIMEVAL get_system_time() {
     a9_timer_curr = timer_get_current_val(2);	//get the current value of the free running timer
     
     // a9_delta: time elapsed since start of previous HPS0 interrupt
@@ -200,75 +200,6 @@ TIMEVAL next_quanta(TIMEVAL time) {
 static const int h_array_size = MAX_TASKS;
 static U32 current_size = 0;
 static U32 g_task_count = 0;
-
-/*
- *===========================================================================
- *                            EDF FUNCTIONS
- *===========================================================================
- */
-
-void edf_insert(task_t tid, TASK_RT info) {
-
-	TIMEVAL time = get_system_time();
-	TIMEVAL wakeup = next_quanta(time);
-	edf_array[tid].info = info;
-
-	// TODO: fix this to use the timers
-	edf_array[tid].deadline = increment_tv(wakeup, info.p_n);
-	edf_array[tid].job_count = 0;
-	edf_array[tid].deadline_count = 0;
-
-	create_deadline(tid, info.p_n, wakeup);
-
-	if (wakeup.usec <= time.usec) {
-		// Start running right away
-		insert(&g_tcbs[tid]);
-		edf_array[tid].suspended = 0;
-	} else {
-		edf_array[tid].suspended = 1;
-		event_suspend(tid, wakeup);
-	}
-
-}
-
-void edf_remove(task_t tid) {
-	edf_array[tid].suspended = 0;
-	edf_array[tid].job_count = 0;
-	event_remove(tid);
-}
-
-void edf_suspend(task_t tid, TIMEVAL suspend_time) {
-
-	TIMEVAL time = get_system_time();
-	TIMEVAL new_wakeup = increment_tv(time, suspend_time);
-
-	edf_array[tid].suspended = 1;
-	g_tcbs[tid].state = SUSPENDED;
-	event_suspend(tid, new_wakeup);
-}
-
-int edf_done(task_t tid) {
-	TIMEVAL time = get_system_time();
-	edf_array[tid].job_count += 1;
-
-	if (edf_array[tid].job_count <= edf_array[tid].deadline_count) {
-		// missed deadline, reinsert and try running right away
-		edf_array[tid].deadline = increment_tv(edf_array[tid].deadline, edf_array[tid].info.p_n);
-		TCB* tcb = &g_tcbs[tid];
-		tcb->state = READY;
-		printf("Missed deadline for job %d, task %d\n\r", edf_array[tid].job_count, tid);
-		insert(tcb);
-		return 1;
-	}
-	// suspend
-
-	g_tcbs[tid].state = SUSPENDED;
-	edf_array[tid].suspended = 1;
-	event_suspend(tid, edf_array[tid].deadline);
-	edf_array[tid].deadline = increment_tv(edf_array[tid].deadline, edf_array[tid].info.p_n);
-
-	return 0;
-}
 
 /*
  *===========================================================================
@@ -350,6 +281,8 @@ void decrease_key(TCB* heap[], int i) {
 }
 
 int insert(TCB* value) {
+	value->rt_finished = 0;
+
     if (current_size + 1== h_array_size) {
         return -1;
     }
@@ -461,7 +394,7 @@ TCB *scheduler(void)
 	gp_current_task = max_ready_tcb;
     extract_max(heap);
 
-    if (current_tcb->state != BLK_MSG && current_tcb->prio != PRIO_RT) {
+    if (!(current_tcb->state == BLK_MSG || current_tcb->state == SUSPENDED || (current_tcb->prio == PRIO_RT && current_tcb->rt_finished))) {
     	insert(current_tcb);
     }
 
@@ -1067,6 +1000,8 @@ int k_tsk_create_rt(task_t *tid, TASK_RT *task)
 		return RTX_ERR;
 	}
 
+	k_mbx_create(task->rt_mbx_size);
+
 	g_num_active_tasks ++;
 
     return RTX_OK;
@@ -1077,7 +1012,6 @@ void k_tsk_done_rt(void) {
     printf("k_tsk_done: Entering\r\n");
 #endif /* DEBUG_0 */
 
-    EDF_TASK_RT rt_info = edf_array[gp_current_task->tid];
     RTX_TASK_INFO info;
     k_tsk_get(gp_current_task->tid, &info);
 

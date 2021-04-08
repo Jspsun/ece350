@@ -136,7 +136,7 @@ void create_deadline(task_t tid, TIMEVAL p_n, TIMEVAL start) {
 int handle_event(EVENT e) {
 	if (e.type == DEADLINE_EVENT) {
 		edf_array[e.tid].deadline_count ++;
-		create_deadline_event(e.tid, increment_tv(edf_array[e.tid].deadline, edf_array[e.tid].info.p_n));
+		create_deadline_event(e.tid, increment_tv(e.timestamp, edf_array[e.tid].info.p_n));
 		return 0;
 	} else if (e.type == SUSPENDED_EVENT) {
 		TCB* tcb = &g_tcbs[e.tid];
@@ -169,4 +169,76 @@ void event_suspend(task_t tid, TIMEVAL wake_up) {
 
 void event_remove(task_t tid) {
 	e_remove_id(e_heap, tid);
+}
+
+/*
+ *===========================================================================
+ *                            EDF FUNCTIONS
+ *===========================================================================
+ */
+
+void edf_insert(task_t tid, TASK_RT info) {
+
+	TIMEVAL time = get_system_time();
+	TIMEVAL wakeup = next_quanta(time);
+	edf_array[tid].info = info;
+
+	// TODO: fix this to use the timers
+	edf_array[tid].deadline = increment_tv(wakeup, info.p_n);
+	edf_array[tid].job_count = 0;
+	edf_array[tid].deadline_count = 0;
+
+	create_deadline(tid, info.p_n, wakeup);
+
+	if (wakeup.usec <= time.usec) {
+		// Start running right away
+		insert(&g_tcbs[tid]);
+		edf_array[tid].suspended = 0;
+	} else {
+		edf_array[tid].suspended = 1;
+		event_suspend(tid, wakeup);
+	}
+
+}
+
+void edf_remove(task_t tid) {
+	edf_array[tid].suspended = 0;
+	edf_array[tid].job_count = 0;
+	event_remove(tid);
+}
+
+void edf_suspend(task_t tid, TIMEVAL suspend_time) {
+
+	TIMEVAL time = get_system_time();
+	TIMEVAL new_wakeup = increment_tv(time, suspend_time);
+
+	edf_array[tid].suspended = 1;
+	g_tcbs[tid].state = SUSPENDED;
+	event_suspend(tid, new_wakeup);
+}
+
+int edf_done(task_t tid) {
+	TIMEVAL time = get_system_time();
+	edf_array[tid].job_count += 1;
+
+	TCB* tcb = &g_tcbs[tid];
+	tcb->rt_finished = 1;
+
+	if (edf_array[tid].job_count <= edf_array[tid].deadline_count) {
+		// missed deadline, reinsert and try running right away
+		edf_array[tid].deadline = increment_tv(edf_array[tid].deadline, edf_array[tid].info.p_n);
+		tcb->state = READY;
+		printf("Missed deadline for job %d, task %d\n\r", edf_array[tid].job_count, tid);
+		printf("Time: %d, %d\n\r", system_time.sec, system_time.usec);
+		insert(tcb);
+		return 1;
+	}
+	// suspend
+
+	g_tcbs[tid].state = SUSPENDED;
+	edf_array[tid].suspended = 1;
+	event_suspend(tid, edf_array[tid].deadline);
+	edf_array[tid].deadline = increment_tv(edf_array[tid].deadline, edf_array[tid].info.p_n);
+
+	return 0;
 }

@@ -74,6 +74,7 @@ typedef struct tcb {
     U16         u_stack_size;   // user-space stack size
     void        (*ptask)();     // task entry address
     U32         mailbox;        // pointer to mailbox
+    U8          rt_finished;    // 1 if finished
 } TCB;
 
 /*

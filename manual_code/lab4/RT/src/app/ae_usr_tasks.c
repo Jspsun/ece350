@@ -74,18 +74,35 @@ static int counter = 0;
 
 void rtask1(void)
 {
-	SER_PutStr(0, "utask2: entering \n\r");
-	printf("task2, sec: %d usec: %d\n\r", system_time.sec, system_time.usec);
+//	SER_PutStr(0, "utask2: entering \n\r");
+	if (counter == 3) {
+		int j = 0;
+		int i = j;
+	}
+
+	printf("rtask1, sec: %d usec: %d, count: %d\n\r", system_time.sec, system_time.usec, counter);
+	TIMEVAL start = system_time;
 
 	counter += 1;
-//	int a = 0;
-//	int delay = counter % 3 == 0 ? 0xFFFFFF : 0x1FFFFFF;
-//
-//	for (int i=0; i < delay; i++) {
-//		a++; // artifical delay
-//	}
+	int a = 0;
+	int delay = counter % 10 == 0 ? 0x3FFFFF : 0;
 
-	printf("utask2: done, %d \n\r", counter);
+	for (int i=0; i < delay; i++) {
+		a++; // artifical delay
+	}
+
+	TIMEVAL t = get_system_time();
+
+//	printf("rtask1 done, elapsed, sec: %d, usec: %d\n\r", t.sec - start.sec, t.usec - start.usec);
+
+//	printf("utask2: done, %d \n\r", counter);
+
+	tsk_done_rt();
+}
+
+void rtask2(void)
+{
+	printf("rtask2, sec: %d usec: %d\n\r", system_time.sec, system_time.usec);
 
 	tsk_done_rt();
 }
@@ -100,13 +117,24 @@ void utask1(void)
 	task_t tid;
 	tsk_create_rt(&tid, &info);
 
+	TIMEVAL deadline2 = {2, 0};
+	TASK_RT info2 = {deadline2, rtask2, PROC_STACK_SIZE, MIN_MBX_SIZE};
+	task_t tid2;
+	tsk_create_rt(&tid2, &info2);
+//	printf("rtask1, sec: %d usec: %d, count: %d\n\r", system_time.sec, system_time.usec, counter);
+
+	//TIMEVAL suspend_time = {3, 0};
+	//tsk_suspend(&suspend_time);
+
+//	printf("rtask1, sec: %d usec: %d, count: %d\n\r", system_time.sec, system_time.usec, counter);
+
 	while(1) {
-		SER_PutStr(0, "utask1: entering \n\r");
+	//	SER_PutStr(0, "utask1: entering \n\r");
 		int a = 0;
 		for (int i=0; i<0xFFFFFF; i++) {
 			a++; // artifical delay
 		}
-		printf("task1, sec: %d usec: %d\n\r", system_time.sec, system_time.usec);
+	//	printf("task1, sec: %d usec: %d\n\r", system_time.sec, system_time.usec);
 	}
 
 }

@@ -70,7 +70,7 @@ typedef struct rtx_msg_char {
  */
  
 extern TIMEVAL system_time;
-extern void get_system_time(void);
+extern TIMEVAL get_system_time(void);
 extern unsigned int a9_timer_last;
 
  /*

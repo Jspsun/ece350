@@ -246,6 +246,51 @@ int k_recv_msg_nb(task_t *sender_tid, void *buf, size_t len) {
 #ifdef DEBUG_0
     printf("k_recv_msg_nb: sender_tid  = 0x%x, buf=0x%x, len=%d\r\n", sender_tid, buf, len);
 #endif /* DEBUG_0 */
-    return 0;
+    TCB tcb = *gp_current_task;
+    if (!buf || !tcb.mailbox) {
+    	return RTX_ERR;
+    }
+
+    C_BUFFER* mailbox = (C_BUFFER*)tcb.mailbox;
+
+    // Prevents the header itself wrapping
+    if (mailbox->data_start >= mailbox->buffer_end - (sizeof(C_METADATA) + sizeof(RTX_MSG_HDR))) {
+    	mailbox->data_start = mailbox->buffer_start;
+    }
+
+    // No messages to receive
+    while (mailbox->data_start == mailbox->data_end) {
+    	return RTX_ERR;
+    }
+
+    C_METADATA * meta = (C_METADATA*) mailbox->data_start;
+    RTX_MSG_HDR* msg = (RTX_MSG_HDR*)(meta + 1);
+    if (len < msg->length) {
+    	return RTX_ERR;
+    }
+
+    // Process one message
+    *sender_tid = meta->sender_tid;
+    mailbox->data_start += sizeof(C_METADATA);
+    if (msg->length + mailbox->data_start <= mailbox->buffer_end) {
+    	mem_cpy((void*)(mailbox->data_start),
+    			buf,
+				msg->length);
+    	mailbox->data_start = align_increment(mailbox->data_start, msg->length, 8);
+    } else {
+
+    	U32 free_space = mailbox->buffer_end - mailbox->data_start;
+
+    	mem_cpy((void*)((U32)mailbox->data_start),
+    			buf,
+				free_space);
+    	mem_cpy((void*)mailbox->buffer_start,
+    			(char*)buf + free_space,
+				msg->length - free_space);
+
+    	mailbox->data_start = align_increment(mailbox->buffer_start, msg->length - free_space, 8);
+    }
+
+    return RTX_OK;
 }
 
