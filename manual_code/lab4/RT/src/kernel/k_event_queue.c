@@ -242,3 +242,8 @@ int edf_done(task_t tid) {
 
 	return 0;
 }
+
+void edf_get(task_t tid, TIMEVAL *p_n, size_t* rt_mbx_size) {
+	*p_n = edf_array[tid].info.p_n;
+	*rt_mbx_size = edf_array[tid].info.rt_mbx_size;
+}

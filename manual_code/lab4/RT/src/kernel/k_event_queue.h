@@ -47,5 +47,7 @@ void edf_suspend(task_t tid, TIMEVAL suspend_time);
 void edf_remove(task_t tid);
 int edf_done(task_t tid);
 
+void edf_get(task_t tid, TIMEVAL *p_n, size_t* rt_mbx_size);
+
 
 #endif /* SRC_KERNEL_K_EVENT_QUEUE_H_ */

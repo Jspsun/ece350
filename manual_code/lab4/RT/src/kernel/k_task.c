@@ -895,6 +895,7 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
         buffer->k_stack_size = KERN_STACK_SIZE;
         buffer->u_stack_hi = g_tcbs[task_id].u_stack_hi;
         buffer->u_stack_size = g_tcbs[task_id].u_stack_size;
+        edf_get(task_id, &buffer->p_n, &buffer->rt_mbx_size);
 
         buffer->u_sp = * (U32*)((U32) g_tcbs[task_id].msp + 108);
 
@@ -987,13 +988,6 @@ int k_tsk_create_rt(task_t *tid, TASK_RT *task)
 	if (g_num_active_tasks == MAX_TASKS) {
 		return RTX_ERR;
 	}
-
-    // TODO: create mailbox if mbx_size != 0
-    // if (task->rt_mbx_size != 0){
-    //     if (k_mbx_create(task->rt_mbx_size) == RTX_ERR){
-    //         return RTX_ERR;
-    //     }
-    // }
 
 	RTX_TASK_INFO task_info;
 	TCB * tcb = NULL;
