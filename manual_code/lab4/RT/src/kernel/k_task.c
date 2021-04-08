@@ -886,13 +886,18 @@ int k_tsk_set_prio(task_t task_id, U8 prio)
     // TODO: This function never blocks, but can be preempted. what does this mean?
     // TODO: if try to set null task to prio PRIO_NULL, do I let it or error?
 
-    // prio invalid or PRIO_NULL
+    // prio invalid or PRIO_NULL or PRIO_RT
     if (prio == PRIO_RT || g_tcbs[task_id].prio == PRIO_RT){
         return RTX_ERR;
     }
 
     // dormant TCB
     if (g_tcbs[task_id].state == DORMANT){
+        return RTX_ERR;
+    }
+
+    // RT task prio cannot be modified
+    if (g_tcbs[task_id].prio == PRIO_RT) {
         return RTX_ERR;
     }
 
@@ -944,6 +949,10 @@ int k_tsk_get(task_t task_id, RTX_TASK_INFO *buffer)
 
     // valid TID excluding 0
     if (task_id > 0 && task_id < MAX_TASKS){
+        if (g_tcbs[task_id].prio == PRIO_RT){
+            buffer->p_n = edf_array[task_id].info.p_n;
+            buffer->rt_mbx_size = edf_array[task_id].info.rt_mbx_size;
+        }
         buffer->tid = task_id;
         buffer->prio = g_tcbs[task_id].prio;
         buffer->state = g_tcbs[task_id].state;
@@ -1033,6 +1042,7 @@ void k_tsk_unblock (TCB *task) {
 
 int k_tsk_create_rt(task_t *tid, TASK_RT *task)
 {
+    // TODO: mailbox size can be 0
 	if (task->p_n.usec % 500 != 0        ||
 	    !task->task_entry                ||
 		task->rt_mbx_size < MIN_MBX_SIZE ||
@@ -1044,6 +1054,13 @@ int k_tsk_create_rt(task_t *tid, TASK_RT *task)
 	if (g_num_active_tasks == MAX_TASKS) {
 		return RTX_ERR;
 	}
+
+    // TODO: create mailbox if mbx_size != 0
+    // if (task->rt_mbx_size != 0){
+    //     if (k_mbx_create(task->rt_mbx_size) == RTX_ERR){
+    //         return RTX_ERR;
+    //     }
+    // }
 
 	RTX_TASK_INFO task_info;
 	TCB * tcb = NULL;
