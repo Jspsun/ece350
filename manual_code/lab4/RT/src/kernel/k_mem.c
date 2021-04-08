@@ -103,6 +103,14 @@ U32* k_alloc_p_stack(task_t tid) {
 //	return g_p_stacks[tid+1];
 }
 
+void* k_alloc_mbx(size_t size)
+{
+	void* mem = k_mem_alloc(size);
+	Node* node = (Node*)mem - 1;
+	node->owner = 0;
+	return mem;
+}
+
 int k_mem_init(void) {
     unsigned int end_addr = (unsigned int) &Image$$ZI_DATA$$ZI$$Limit;
 #ifdef DEBUG_0
@@ -232,7 +240,7 @@ int k_mem_dealloc(void *ptr) {
     }
 
    if (!gp_current_task->priv) {
-       if (gp_current_task->tid != curr->owner){
+       if (gp_current_task->tid != curr->owner && curr->owner != 0){
            return RTX_ERR;
        }
    }

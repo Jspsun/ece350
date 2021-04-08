@@ -20,6 +20,7 @@ typedef struct circular_buffer {
 	U32 buffer_end; // End of buffer in memory
 	U32 data_start; // Start of "valid data" in memory
 	U32 data_end; // End of "valid data" in memory.
+	int is_full;
 } __attribute__((aligned(8)))C_BUFFER;
 
 typedef struct c_metadata {
@@ -52,7 +53,7 @@ int c_insert(C_BUFFER* mailbox, void* buf) {
 
     U32 mailbox_len = mailbox->buffer_end - mailbox->buffer_start;
     U32 length = hdr->length + sizeof(C_METADATA);
-    if (mailbox_len < length) {
+    if (mailbox_len < length || mailbox->is_full == 1) {
     	return RTX_ERR;
     }
 
@@ -73,10 +74,18 @@ int c_insert(C_BUFFER* mailbox, void* buf) {
         	mailbox->data_end = mailbox->buffer_start;
         }
 
+        if (mailbox->data_end == mailbox->data_start) {
+        	mailbox->is_full = 1;
+        }
+
     	return RTX_OK;
     }
 
     if (mailbox->data_end + length <= mailbox->buffer_end) {
+    	if (mailbox->data_start - mailbox->buffer_start + mailbox->buffer_end - mailbox->data_end <= length) {
+    		return RTX_ERR;
+    	}
+
     	mem_cpy(&meta, (void*)mailbox->data_end, sizeof(C_METADATA));
     	mem_cpy(buf,
     			(void*)(mailbox->data_end + sizeof(C_METADATA)),
@@ -87,8 +96,16 @@ int c_insert(C_BUFFER* mailbox, void* buf) {
         	mailbox->data_end = mailbox->buffer_start;
         }
 
+        if (mailbox->data_end == mailbox->data_start) {
+        	mailbox->is_full = 1;
+        }
+
     	return RTX_OK;
     }
+
+	if (mailbox->data_start - mailbox->buffer_start + mailbox->buffer_end - mailbox->data_end <= length) {
+		return RTX_ERR;
+	}
 
     //
     U32 first_copy_length = mailbox->buffer_end - mailbox->data_end;
@@ -115,6 +132,10 @@ int c_insert(C_BUFFER* mailbox, void* buf) {
     	mailbox->data_end = mailbox->buffer_start;
     }
 
+    if (mailbox->data_end == mailbox->data_start) {
+    	mailbox->is_full = 1;
+    }
+
     return RTX_OK;
 }
 
@@ -128,8 +149,8 @@ int k_mbx_create(size_t size) {
     }
 
     // Memory layout: Buffer_data | Buffer size
-    size_t total_size = size + sizeof(C_BUFFER);
-    void *mem = k_mem_alloc(total_size);
+    size_t total_size = align_increment(sizeof(C_BUFFER), size, 8);
+    void *mem = k_alloc_mbx(total_size);
     if (!mem) {
     	return RTX_ERR;
     }
@@ -141,6 +162,7 @@ int k_mbx_create(size_t size) {
     buffer->buffer_end   = (U32)buffer + total_size;
     buffer->data_start   = buffer->buffer_start;
     buffer->data_end     = buffer->data_start;
+    buffer->is_full = 0;
 
     gp_current_task->mailbox = (U32)buffer;
 
@@ -199,13 +221,13 @@ int k_recv_msg(task_t *sender_tid, void *buf, size_t len) {
     }
 
     // No messages to receive
-    while (mailbox->data_start == mailbox->data_end) {
+    while (mailbox->data_start == mailbox->data_end && !mailbox->is_full) {
     	k_tsk_block();
     }
 
     C_METADATA * meta = (C_METADATA*) mailbox->data_start;
     RTX_MSG_HDR* msg = (RTX_MSG_HDR*)(meta + 1);
-    if (len < msg->length) {
+    if (align_increment(0, len, 4) < msg->length) {
     	return RTX_ERR;
     }
 
@@ -230,6 +252,8 @@ int k_recv_msg(task_t *sender_tid, void *buf, size_t len) {
 
     	mailbox->data_start = align_increment(mailbox->buffer_start, msg->length - free_space, 8);
     }
+
+    mailbox->is_full = 0;
 
     return RTX_OK;
 }
