@@ -962,10 +962,8 @@ void k_tsk_unblock (TCB *task) {
 
 int k_tsk_create_rt(task_t *tid, TASK_RT *task)
 {
-    // TODO: mailbox size can be 0
 	if (task->p_n.usec % 500 != 0        ||
 	    !task->task_entry                ||
-		task->rt_mbx_size < MIN_MBX_SIZE ||
 		g_num_active_tasks == MAX_TASKS  ||
 		validate_stack_size(task->u_stack_size) == RTX_ERR) {
 		return RTX_ERR;
@@ -974,6 +972,12 @@ int k_tsk_create_rt(task_t *tid, TASK_RT *task)
 	if (g_num_active_tasks == MAX_TASKS) {
 		return RTX_ERR;
 	}
+
+    if (task->rt_mbx_size != 0){
+        if (k_mbx_create(task->rt_mbx_size) == RTX_ERR){
+            return RTX_ERR;
+        }
+    }
 
 	RTX_TASK_INFO task_info;
 	TCB * tcb = NULL;
@@ -996,8 +1000,6 @@ int k_tsk_create_rt(task_t *tid, TASK_RT *task)
 	if (k_tsk_create_new(&task_info, tcb, *tid) == RTX_ERR) {
 		return RTX_ERR;
 	}
-
-	k_mbx_create(task->rt_mbx_size);
 
 	g_num_active_tasks ++;
 
