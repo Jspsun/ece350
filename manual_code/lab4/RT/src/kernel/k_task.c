@@ -361,6 +361,8 @@ int currently_running() {
 
 TCB *scheduler(void)
 {
+    TIMEVAL now = get_system_time();
+    update(now);
 	int16_t tid = maximum(heap);
 	//int16_t tid = extract_max(heap);
 	if (tid < 0) { return gp_current_task; }
