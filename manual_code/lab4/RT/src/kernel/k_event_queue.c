@@ -240,7 +240,8 @@ int edf_done(task_t tid) {
 		// missed deadline, reinsert and try running right away
 		edf_array[tid].deadline = increment_tv(edf_array[tid].deadline, edf_array[tid].info.p_n);
 		tcb->state = READY;
-		printf("Missed deadline for job %d, task %d\n\r", edf_array[tid].job_count, tid);
+		// printf("Missed deadline for job %d, task %d\n\r", edf_array[tid].job_count, tid);
+		printf("Job %d of task %d missed its deadline\n\r", edf_array[tid].job_count, tid);
 		printf("Time: %d, %d\n\r", system_time.sec, system_time.usec);
 		insert(tcb);
 		return 1;

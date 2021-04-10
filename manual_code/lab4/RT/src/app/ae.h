@@ -35,6 +35,12 @@
 #include "ae_priv_tasks.h"
 #include "ae_usr_tasks.h"
 
+#define TEST 0
+
+#if TEST == 0
+	#define init_tasks 1
+#endif
+
 /*
  *===========================================================================
  *                            FUNCTION PROTOTYPES
