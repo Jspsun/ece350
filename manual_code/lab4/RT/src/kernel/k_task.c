@@ -438,11 +438,27 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
                 g_num_active_tasks++;
             }
         } else {
-            TCB *p_tcb = &g_tcbs[tcb_index];
-            if (k_tsk_create_new(p_taskinfo, p_tcb, tcb_index) == RTX_OK) {
-                g_num_active_tasks++;
+            if(p_taskinfo->prio == PRIO_RT){
+                TASK_RT temp; // Does not need to be mem alloc'd
+                temp.p_n = p_taskinfo->p_n;
+                temp.task_entry = p_taskinfo->ptask;
+                temp.u_stack_size = p_taskinfo->u_stack_size;
+                temp.rt_mbx_size = p_taskinfo->rt_mbx_size;
+
+                task_t * dummy;
+                if (k_tsk_create_rt(dummy, &temp) == RTX_OK) {
+                    g_num_active_tasks++;
+                    tcb_index++;
+                } else {
+                    return RTX_ERR;
+                }
+            } else {
+                TCB *p_tcb = &g_tcbs[tcb_index];
+                if (k_tsk_create_new(p_taskinfo, p_tcb, tcb_index) == RTX_OK) {
+                    g_num_active_tasks++;
+                    tcb_index++;
+                }
             }
-            tcb_index++;
         }
         p_taskinfo++;
         numCreated++;
