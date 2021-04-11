@@ -453,7 +453,6 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
 
                 task_t * dummy;
                 if (k_tsk_create_rt_priv(dummy, &temp, p_taskinfo->priv) == RTX_OK) {
-                    g_num_active_tasks++;
                     tcb_index++;
                 } else {
                     return RTX_ERR;
