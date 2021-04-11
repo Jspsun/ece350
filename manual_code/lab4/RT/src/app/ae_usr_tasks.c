@@ -107,37 +107,130 @@ void rtask2(void)
 	tsk_done_rt();
 }
 
-/**
- * @brief: a dummy task1
- */
-void utask1(void)
-{
-	TIMEVAL deadline = {0, 500000};
-	TASK_RT info = {deadline,  rtask1, PROC_STACK_SIZE, MIN_MBX_SIZE};
+#if TEST==0
+void utask1(void){
+	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("Task ID: %d", gp_current_task->tid);
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	tsk_done_rt();
+}
+
+void utask2(void){
+	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("Task ID: %d", gp_current_task->tid);
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	tsk_done_rt();
+}
+#endif
+
+#if TEST==1
+void utask1(void){
+	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("Task ID: %d", gp_current_task->tid);
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	tsk_done_rt();
+}
+
+void utask2(void){
+	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("Task ID: %d", gp_current_task->tid);
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	tsk_done_rt();
+}
+#endif
+
+#if TEST==2
+void utask1(void){
+	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("Task ID: %d", gp_current_task->tid);
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	tsk_done_rt();
+}
+
+void utask2(void){
+	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("Task ID: %d", gp_current_task->tid);
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	tsk_done_rt();
+}
+#endif
+
+#if TEST==3
+void utask1(void){
+	SER_PutStr(0, "User Task 1 setting up RTX Task\n\r");
+	TIMEVAL period;
+	period.sec = 0;
+	period.usec = 500000;
+
+	TASK_RT temp;
+	temp.p_n = period;
+	temp.task_entry = &ktask1();
+	temp.u_stack_size = 0x200;
+	temp.rt_mbx_size = MIN_MBX_SIZE;
+
 	task_t tid;
-	tsk_create_rt(&tid, &info);
 
-	TIMEVAL deadline2 = {2, 0};
-	TASK_RT info2 = {deadline2, rtask2, PROC_STACK_SIZE, MIN_MBX_SIZE};
-	task_t tid2;
-	tsk_create_rt(&tid2, &info2);
-//	printf("rtask1, sec: %d usec: %d, count: %d\n\r", system_time.sec, system_time.usec, counter);
-
-	//TIMEVAL suspend_time = {3, 0};
-	//tsk_suspend(&suspend_time);
-
-//	printf("rtask1, sec: %d usec: %d, count: %d\n\r", system_time.sec, system_time.usec, counter);
-
-	while(1) {
-	//	SER_PutStr(0, "utask1: entering \n\r");
-		int a = 0;
-		for (int i=0; i<0xFFFFFF; i++) {
-			a++; // artifical delay
-		}
-	//	printf("task1, sec: %d usec: %d\n\r", system_time.sec, system_time.usec);
+	if(tsk_create_rt(&tid, &temp) == RTX_ERR){
+		SER_PutStr(0, "create_rt failed as expected\n\r");
 	}
 
+	if(tsk_set_prio(tid, HIGH) == RTX_ERR){
+		SER_PutStr(0, "set_prio failed as expected\n\r");
+	}
+
+	mbx_create(KCD_MBX_SIZE);
+	task_t sender_tid;
+	char* recv_buf = mem_alloc(KCD_MBX_SIZE);
+
+	while(1){
+		if(recv_msg_nb(&sender_tid, recv_buf, KCD_MBX_SIZE) == RTX_OK){
+			SER_PutStr(0, "User task received a message\n\r");
+		} else {
+			SER_PutStr(0, "Checked mailbox, it was empty\n\r");
+		}
+		tsk_yield();
+	}
 }
+
+void utask2(void){
+	tsk_exit();
+}
+#endif
+
+#if TEST==4
+void utask1(void){
+	TIMEVAL t2Start;
+	t2Start.sec = 0;
+	t2Start.usec = 250000;
+
+	while(compare_timeval(t2Start, system_time) == 0);
+
+	TIMEVAL period;
+	period.sec = 0;
+	period.usec = 500000;
+
+	TASK_RT temp;
+	temp.p_n = period;
+	temp.task_entry = &utask2();
+	temp.u_stack_size = 0x200;
+	temp.rt_mbx_size = MIN_MBX_SIZE;
+
+	if(tsk_create_rt(&tid, &temp) == RTX_OK){
+		printf("Task Creation successful");
+	} else {
+		printf("Task creation failed");
+	}
+
+	tsk_done();
+}
+
+void utask2(void){
+	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("Task ID: %d", gp_current_task->tid);
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	tsk_done_rt();
+}
+#endif
 
 /*
  *===========================================================================

@@ -59,6 +59,8 @@ extern void task1(void);
 void ktask1     (void);
 void ktask2     (void);
 void ktask3     (void);
+void ktask4     (void);
+void ktask5     (void);
 
 #endif // ! PRIV_TASKS_H_
 /*

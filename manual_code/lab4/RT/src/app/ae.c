@@ -120,6 +120,65 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 		tasks[0].rt_mbx_size = MIN_MBX_SIZE;
 	#endif
 
+	#if TEST == 1
+		SER_PutStr(0, "Setting up Test 1\n\r");
+		TIMEVAL temp;
+		temp.sec = 0;
+		temp.usec = 500000;
+
+		tasks[0].u_stack_size = 0x200;
+		tasks[0].ptask = &ktask1;
+		tasks[0].prio = PRIO_RT;
+		tasks[0].priv = 1; // Change this to switch between privileged and unprivileged
+		tasks[0].p_n = temp;
+		tasks[0].rt_mbx_size = MIN_MBX_SIZE;
+	#endif
+
+	#if TEST == 2
+		SER_PutStr(0, "Setting up Test 1\n\r");
+		TIMEVAL temp;
+		temp.sec = 0;
+		temp.usec = 500000;
+
+		tasks[0].u_stack_size = 0x200;
+		tasks[0].ptask = &ktask1;	// Change this to ktask 1/2/3
+		tasks[0].prio = PRIO_RT;
+		tasks[0].priv = 1; // Change this to switch between privileged and unprivileged
+		tasks[0].p_n = temp;
+		tasks[0].rt_mbx_size = MIN_MBX_SIZE;
+	#endif
+
+	#if TEST == 3
+		SER_PutStr(0, "Setting up Test 1\n\r");
+		TIMEVAL temp;
+		temp.sec = 0;
+		temp.usec = 500000;
+
+		tasks[0].u_stack_size = 0x200;
+		tasks[0].ptask = &utask1;	// Change this to ktask 1/2/3
+		tasks[0].prio = HIGH;
+		tasks[0].priv = 0; // Change this to switch between privileged and unprivileged
+	#endif
+
+	#if TEST == 4
+		SER_PutStr(0, "Setting up Test 1\n\r");
+		TIMEVAL temp;
+		temp.sec = 0;
+		temp.usec = 500000;
+
+		tasks[0].u_stack_size = 0x200;
+		tasks[0].ptask = &ktask1;	// Change this to ktask 1/2/3
+		tasks[0].prio = PRIO_RT;
+		tasks[0].priv = 1; // Change this to switch between privileged and unprivileged
+		tasks[0].p_n = temp;
+		tasks[0].rt_mbx_size = MIN_MBX_SIZE;
+
+		tasks[1].u_stack_size = 0x200;
+		tasks[1].ptask = &utask1;	// Change this to ktask 1/2/3
+		tasks[1].prio = HIGH;
+		tasks[1].priv = 0; // Change this to switch between privileged and unprivileged
+	#endif
+
     return;
 }
 

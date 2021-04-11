@@ -81,13 +81,24 @@ void ktask3(void) {
 	k_tsk_exit();
 }
 
+void ktask4(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
+void ktask5(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
 #endif
 
 #if TEST == 1
 
 void ktask1(void) {
 	SER_PutStr(0, "ktask1: entering \n\r");
-
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	k_tsk_done_rt();
 }
 
 void ktask2(void) {
@@ -96,6 +107,16 @@ void ktask2(void) {
 }
 
 void ktask3(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+
+}
+
+void ktask4(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+
+}
+
+void ktask5(void) {
 	SER_PutStr(0, "ktask3: entering \n\r");
 
 }
@@ -106,17 +127,117 @@ void ktask3(void) {
 
 void ktask1(void) {
 	SER_PutStr(0, "ktask1: entering \n\r");
-
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("Suspending for 0.3 seconds");
+	TIMEVAL temp;
+	temp.sec = 0;
+	temp.usec = 300000;
+	k_tsk_suspend(temp);
+	k_tsk_done_rt();
 }
 
 void ktask2(void) {
 	SER_PutStr(0, "ktask2: entering \n\r");
-
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("Suspending for 0.6 seconds");
+	TIMEVAL temp;
+	temp.sec = 0;
+	temp.usec = 300000;
+	k_tsk_suspend(temp);
+	k_tsk_done_rt();
 }
 
 void ktask3(void) {
 	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("Suspending for 0.9 seconds");
+	TIMEVAL temp;
+	temp.sec = 0;
+	temp.usec = 900000;
+	k_tsk_suspend(temp);
+	k_tsk_done_rt();
+}
 
+void ktask4(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("Suspending for 1.2 seconds");
+	TIMEVAL temp;
+	temp.sec = 1;
+	temp.usec = 200000;
+	k_tsk_suspend(temp);
+	k_tsk_done_rt();
+}
+
+void ktask5(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("Suspending for 3.0 seconds");
+	TIMEVAL temp;
+	temp.sec = 3;
+	temp.usec = 0;
+	k_tsk_suspend(temp);
+	k_tsk_done_rt();
+}
+
+#endif
+
+#if TEST == 3
+
+void ktask1(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
+void ktask2(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
+void ktask3(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
+void ktask4(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
+void ktask5(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
+#endif
+
+#if TEST == 4
+
+void ktask1(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	printf("Task ID: %d", gp_current_task->tid);
+	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	k_tsk_done_rt();
+}
+
+void ktask2(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
+void ktask3(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
+void ktask4(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
+void ktask5(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
 }
 
 #endif
