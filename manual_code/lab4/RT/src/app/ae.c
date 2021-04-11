@@ -106,7 +106,7 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
         return;
     }
 
-	#if TEST == 0
+	#if TEST == 0 // Run as privledged first, then unprivileged
 		SER_PutStr(0, "Setting up Test 0\n\r");
 		TIMEVAL temp;
 		temp.sec = 1;
@@ -120,7 +120,7 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 		tasks[0].rt_mbx_size = MIN_MBX_SIZE;
 	#endif
 
-	#if TEST == 1
+	#if TEST == 1 // Run as privledged first, then unprivileged
 		SER_PutStr(0, "Setting up Test 1\n\r");
 		TIMEVAL temp;
 		temp.sec = 0;
@@ -129,12 +129,12 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 		tasks[0].u_stack_size = 0x200;
 		tasks[0].ptask = &ktask1;
 		tasks[0].prio = PRIO_RT;
-		tasks[0].priv = 1; // Change this to switch between privileged and unprivileged
+		tasks[0].priv = 1;
 		tasks[0].p_n = temp;
 		tasks[0].rt_mbx_size = MIN_MBX_SIZE;
 	#endif
 
-	#if TEST == 2
+	#if TEST == 2 // Run as privledged first, then unprivileged
 		SER_PutStr(0, "Setting up Test 1\n\r");
 		TIMEVAL temp;
 		temp.sec = 0;
@@ -143,7 +143,7 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 		tasks[0].u_stack_size = 0x200;
 		tasks[0].ptask = &ktask1;	// Change this to ktask 1/2/3
 		tasks[0].prio = PRIO_RT;
-		tasks[0].priv = 1; // Change this to switch between privileged and unprivileged
+		tasks[0].priv = 1;
 		tasks[0].p_n = temp;
 		tasks[0].rt_mbx_size = MIN_MBX_SIZE;
 	#endif
@@ -169,14 +169,14 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 		tasks[0].u_stack_size = 0x200;
 		tasks[0].ptask = &ktask1;	// Change this to ktask 1/2/3
 		tasks[0].prio = PRIO_RT;
-		tasks[0].priv = 1; // Change this to switch between privileged and unprivileged
+		tasks[0].priv = 1;
 		tasks[0].p_n = temp;
 		tasks[0].rt_mbx_size = MIN_MBX_SIZE;
 
 		tasks[1].u_stack_size = 0x200;
 		tasks[1].ptask = &utask1;	// Change this to ktask 1/2/3
 		tasks[1].prio = HIGH;
-		tasks[1].priv = 0; // Change this to switch between privileged and unprivileged
+		tasks[1].priv = 0;
 	#endif
 
     return;
