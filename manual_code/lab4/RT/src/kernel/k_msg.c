@@ -144,7 +144,7 @@ int k_mbx_create(size_t size) {
     printf("k_mbx_create: size = %d\r\n", size);
 #endif /* DEBUG_0 */
 
-    if (gp_current_task->mailbox || size < MIN_MBX_SIZE) {
+    if (gp_current_task->mailbox != NULL || size < MIN_MBX_SIZE) {
     	return RTX_ERR;
     }
 

@@ -68,6 +68,7 @@ void ktask1(void) {
 		SER_PutStr(0, "set_prio did not return RTX_ERR!\n\r");
 	}
 
+	k_tsk_done_rt();
 }
 
 void ktask2(void) {
