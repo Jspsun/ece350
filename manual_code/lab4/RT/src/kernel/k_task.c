@@ -427,6 +427,8 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
     for(int i = 1; i < MAX_TASKS; i++){
         g_tcbs[i].state = DORMANT;
         g_tcbs[i].tid = i;
+        g_tcbs[i].mailbox = NULL;
+        g_tcbs[i].rt_finished = 0;
     }
 
     // create the rest of the tasks

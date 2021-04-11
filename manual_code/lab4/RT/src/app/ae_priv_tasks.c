@@ -48,7 +48,7 @@
 void ktask1(void) {
 	SER_PutStr(0, "ktask1: entering \n\r");
 	RTX_TASK_INFO buffer;
-	task_t tid= 1;
+	task_t tid = 1;
 
 	if(k_tsk_get(tid, &buffer) != RTX_OK){
 		SER_PutStr(0, "k_tsk_get failed\n\r");

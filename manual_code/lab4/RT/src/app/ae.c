@@ -107,10 +107,11 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
     }
 
 	#if TEST == 0
+		SER_PutStr(0, "Setting up Test 0\n\r");
 		TIMEVAL temp;
 		temp.sec = 1;
 		temp.usec = 0;
-		
+
 		tasks[0].u_stack_size = 0x200;
 		tasks[0].ptask = &ktask1;
 		tasks[0].prio = PRIO_RT;
