@@ -75,6 +75,7 @@ typedef struct tcb {
     void        (*ptask)();     // task entry address
     U32         mailbox;        // pointer to mailbox
     U8          rt_finished;    // 1 if finished
+    U32        *initial_msp;
 } TCB;
 
 /*
