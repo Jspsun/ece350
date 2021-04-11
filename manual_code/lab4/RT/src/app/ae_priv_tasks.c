@@ -43,45 +43,82 @@
 #include "Serial.h"
 #include "printf.h"
 
-void ktask2(void) {
-	k_tsk_exit();
-	while (1) {
-		SER_PutStr(0, "ktask2: entering \n\r");
-		for (int i=0; i < 0x2FFFFFF; i++)
-			; // artifical delay
-		
-		SER_PutStr(0, "ktask2: yielding \n\r");
-		k_tsk_yield();
-	}
-}
+#if TEST == 0
 
 void ktask1(void) {
 	SER_PutStr(0, "ktask1: entering \n\r");
-	/* do something */
-	long int x = 0;
-	int i = 0;
-	int j = 0;
-	while (1)
-	{
-		SER_PutStr(0, "ktask1: ");
-		char out_char = '0' + i % 10;
-		for (j = 0; j < 5; j++) {
-			SER_PutChar(0, out_char);
-		}
-		SER_PutStr(0, "\n\r");
+	RTX_TASK_INFO buffer;
+	task_t tid= 1;
 
-		for (x = 0; x < 5000000; x++)
-			; // some artifical delay
-		if (((++i)%6) == 0)
-		{
-			SER_PutStr(0, "ktask1 yielding CPU. \n\r");
-			k_tsk_yield();
-			SER_PutStr(0, "back to ktask1. \n\r");
+	if(k_tsk_get(tid, &buffer) != RTX_OK){
+		SER_PutStr(0, "k_tsk_get failed\n\r");
+	} else {
+		if(buffer.rt_mbx_size == MIN_MBX_SIZE){
+			SER_PutStr(0, "Got the right mbx size\n\r");
+		}
+		if(buffer.p_n.sec == 1 && buffer.p_n.usec == 0){
+			SER_PutStr(0, "Got the right p_n\n\r");
 		}
 	}
-	/* terminating */
-	// k_tsk_exit();
+
+	SER_PutStr(0, "Attempting to change own prio\n\r");
+	if(k_tsk_set_prio(tid, HIGH) == RTX_ERR){
+		SER_PutStr(0, "set_prio returns RTX_ERR, as expected\n\r");
+	} else {
+		SER_PutStr(0, "set_prio did not return RTX_ERR!\n\r");
+	}
+
 }
+
+void ktask2(void) {
+	SER_PutStr(0, "ktask2: entering \n\r");
+	k_tsk_exit();
+}
+
+void ktask3(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+	k_tsk_exit();
+}
+
+#endif
+
+#if TEST == 1
+
+void ktask1(void) {
+	SER_PutStr(0, "ktask1: entering \n\r");
+
+}
+
+void ktask2(void) {
+	SER_PutStr(0, "ktask2: entering \n\r");
+
+}
+
+void ktask3(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+
+}
+
+#endif
+
+#if TEST == 2
+
+void ktask1(void) {
+	SER_PutStr(0, "ktask1: entering \n\r");
+
+}
+
+void ktask2(void) {
+	SER_PutStr(0, "ktask2: entering \n\r");
+
+}
+
+void ktask3(void) {
+	SER_PutStr(0, "ktask3: entering \n\r");
+
+}
+
+#endif
 
 /*
  *===========================================================================

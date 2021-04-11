@@ -106,44 +106,21 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
         return;
     }
 
-    // for (int i = 0; i < num_tasks; i++ ) {
-    //     tasks[i].u_stack_size = 0x0;
-    //     tasks[i].prio = HIGH;
-    //     tasks[i].priv = 1;
-    // }
-
-//    // 1. base case: check system time increments properly without entering SVC mode
-//    tasks[0].u_stack_size = 0x200;
-//    tasks[0].ptask = &check_sys_timer;
-//    tasks[0].prio = MEDIUM;
-//    tasks[0].priv = 0;
-
-     // 2. SVC case: check system time increments properly after entering SVC mode
-     tasks[0].u_stack_size = 0x200;
-     tasks[0].ptask = &utask1;
-     tasks[0].prio = MEDIUM;
-     tasks[0].priv = 0;
+	#if TEST == 0
+		TIMEVAL temp;
+		temp.sec = 1;
+		temp.usec = 0;
+		
+		tasks[0].u_stack_size = 0x200;
+		tasks[0].ptask = &ktask1;
+		tasks[0].prio = PRIO_RT;
+		tasks[0].priv = 1;
+		tasks[0].p_n = temp;
+		tasks[0].rt_mbx_size = MIN_MBX_SIZE;
+	#endif
 
     return;
 }
-
-//void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
-//
-//	if (tasks == NULL) {
-//		return;
-//	}
-//
-//	for (int i = 0; i < num_tasks; i++) {
-//		tasks[i].u_stack_size = 0x200;
-//		tasks[i].prio = 100;
-//		tasks[i].priv = 0;
-//	}
-//	tasks[0].priv = 1;
-//	tasks[0].ptask = &ktask1;
-//	tasks[1].ptask = &utask1;
-//	tasks[2].ptask = &utask2;
-//	return;
-//}
 
 /* only used in LAB1 */
 #ifdef AE_LAB1
