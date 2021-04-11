@@ -452,7 +452,7 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
                 temp.rt_mbx_size = p_taskinfo->rt_mbx_size;
 
                 task_t * dummy;
-                if (k_tsk_create_rt(dummy, &temp) == RTX_OK) {
+                if (k_tsk_create_rt_priv(dummy, &temp, p_taskinfo->priv) == RTX_OK) {
                     g_num_active_tasks++;
                     tcb_index++;
                 } else {
@@ -598,6 +598,7 @@ int k_tsk_create_new(RTX_TASK_INFO *p_taskinfo, TCB *p_tcb, task_t tid)
     }
 
     p_tcb->msp = sp;                        // store msp in TCB
+    p_tcb->initial_msp = sp;
     p_tcb->ptask = p_taskinfo->ptask;       // store task entry in TCB
     p_tcb->prio = p_taskinfo->prio;         // store priority in TCB
     p_tcb->priv = p_taskinfo->priv;         // store privilege in
@@ -672,6 +673,10 @@ int k_tsk_run_new(void)
     	   p_tcb_old->state != BLK_MSG &&
 		   p_tcb_old->state != SUSPENDED){
             p_tcb_old->state = READY;       // change state of the to-be-switched-out tcb
+    	}
+
+    	if (gp_current_task->prio == PRIO_RT && gp_current_task->priv == 1) {
+    		gp_current_task->msp = gp_current_task->initial_msp;
     	}
         k_tsk_switch(p_tcb_old);            // switch stacks
     }
@@ -983,7 +988,7 @@ void k_tsk_unblock (TCB *task) {
  *===========================================================================
  */
 
-int k_tsk_create_rt(task_t *tid, TASK_RT *task)
+int k_tsk_create_rt_priv(task_t *tid, TASK_RT *task, int priv)
 {
 	if (task->p_n.usec % 500 != 0        ||
 	    !task->task_entry                ||
@@ -1008,7 +1013,7 @@ int k_tsk_create_rt(task_t *tid, TASK_RT *task)
 
 	*tid = tcb->tid;
 	task_info.prio = PRIO_RT;
-	task_info.priv = 0;
+	task_info.priv = priv;
 	task_info.u_stack_size = task->u_stack_size;
 	task_info.ptask = task->task_entry;
 
@@ -1033,6 +1038,11 @@ int k_tsk_create_rt(task_t *tid, TASK_RT *task)
     g_num_active_tasks ++;
 
     return RTX_OK;
+}
+
+int k_tsk_create_rt(task_t *tid, TASK_RT *task)
+{
+	return k_tsk_create_rt_priv(tid, task, 0);
 }
 
 void k_tsk_done_rt(void) {
