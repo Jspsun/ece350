@@ -420,6 +420,8 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
     p_tcb->priv     = 1;
     p_tcb->tid      = TID_NULL;
     p_tcb->state    = RUNNING;
+    p_tcb->mailbox  = NULL;
+    p_tcb->rt_finished = 0;
     g_num_active_tasks++;
     gp_current_task = p_tcb;
 
@@ -456,9 +458,10 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
                 } else {
                     return RTX_ERR;
                 }
+
             } else {
-                TCB *p_tcb = &g_tcbs[tcb_index];
-                if (k_tsk_create_new(p_taskinfo, p_tcb, tcb_index) == RTX_OK) {
+                TCB *temp_tcb = &g_tcbs[tcb_index];
+                if (k_tsk_create_new(p_taskinfo, temp_tcb, tcb_index) == RTX_OK) {
                     g_num_active_tasks++;
                     tcb_index++;
                 }
@@ -993,12 +996,6 @@ int k_tsk_create_rt(task_t *tid, TASK_RT *task)
 		return RTX_ERR;
 	}
 
-    if (task->rt_mbx_size != 0){
-        if (k_mbx_create(task->rt_mbx_size) == RTX_ERR){
-            return RTX_ERR;
-        }
-    }
-
 	RTX_TASK_INFO task_info;
 	TCB * tcb = NULL;
 
@@ -1020,6 +1017,17 @@ int k_tsk_create_rt(task_t *tid, TASK_RT *task)
 	if (k_tsk_create_new(&task_info, tcb, *tid) == RTX_ERR) {
 		return RTX_ERR;
 	}
+
+    TCB * calling_task = gp_current_task;
+    if (task->rt_mbx_size != 0){
+        gp_current_task = tcb;
+        if (k_mbx_create(task->rt_mbx_size) == RTX_ERR){
+            gp_current_task = calling_task;
+            return RTX_ERR;
+        } else {
+            gp_current_task = calling_task;
+        }
+    }
 
 	g_num_active_tasks ++;
 
