@@ -1023,13 +1023,14 @@ int k_tsk_create_rt(task_t *tid, TASK_RT *task)
         gp_current_task = tcb;
         if (k_mbx_create(task->rt_mbx_size) == RTX_ERR){
             gp_current_task = calling_task;
+            tcb->state = DORMANT;
             return RTX_ERR;
         } else {
             gp_current_task = calling_task;
         }
     }
 
-	g_num_active_tasks ++;
+    g_num_active_tasks ++;
 
     return RTX_OK;
 }
