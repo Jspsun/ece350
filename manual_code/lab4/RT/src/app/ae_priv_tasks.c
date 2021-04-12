@@ -205,8 +205,8 @@ void ktask5(void) {
 
 void ktask1(void) {
 	SER_PutStr(0, "ktask1: entering \n\r");
-	printf("Task ID: %d", gp_current_task->tid);
-	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("Task ID: %d\n\r", gp_current_task->tid);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	k_tsk_done_rt();
 }
 
