@@ -305,17 +305,19 @@ void utask2(void){
 void utask1(void){
 	TIMEVAL t2Start;
 	t2Start.sec = 0;
-	t2Start.usec = 250000;
+	t2Start.usec = 500000;
 
-	while(compare_timeval(t2Start, system_time) == 0);
+	while(compare_timeval(t2Start, system_time) == 0){
+		;
+	}
 
 	TIMEVAL period;
-	period.sec = 0;
-	period.usec = 500000;
+	period.sec = 1;
+	period.usec = 0;
 
 	TASK_RT temp;
 	temp.p_n = period;
-	temp.task_entry = &utask2();
+	temp.task_entry = &utask2;
 	temp.u_stack_size = 0x200;
 	temp.rt_mbx_size = MIN_MBX_SIZE;
 
@@ -325,11 +327,20 @@ void utask1(void){
 		printf("Task creation failed");
 	}
 
+	while(1){
+		if(recv_msg_nb(&sender_tid, recv_buf, KCD_MBX_SIZE) == RTX_OK){
+			SER_PutStr(0, "User task received a message\n\r");
+		} else {
+			SER_PutStr(0, "Checked mailbox, it was empty\n\r");
+		}
+		tsk_yield();
+	}
+
 	tsk_done();
 }
 
 void utask2(void){
-	SER_PutStr(0, "ktask3: entering \n\r");
+	SER_PutStr(0, "utask2: entering \n\r");
 	printf("Task ID: %d", gp_current_task->tid);
 	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
 	tsk_done_rt();

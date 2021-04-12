@@ -149,7 +149,7 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 	#endif
 
 	#if TEST == 3
-		SER_PutStr(0, "Setting up Test 1\n\r");
+		SER_PutStr(0, "Setting up Test 3\n\r");
 		TIMEVAL temp;
 		temp.sec = 0;
 		temp.usec = 500000;
@@ -161,10 +161,10 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 	#endif
 
 	#if TEST == 4
-		SER_PutStr(0, "Setting up Test 1\n\r");
+		SER_PutStr(0, "Setting up Test 4\n\r");
 		TIMEVAL temp;
-		temp.sec = 0;
-		temp.usec = 500000;
+		temp.sec = 1;
+		temp.usec = 0;
 
 		tasks[0].u_stack_size = 0x200;
 		tasks[0].ptask = &ktask1;	// Change this to ktask 1/2/3
