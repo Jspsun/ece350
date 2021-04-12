@@ -334,6 +334,10 @@ void utask1(void){
 	char* recv_buf = mem_alloc(KCD_MBX_SIZE);
 
 	while(1){
+		int a;
+		for(int i = 0; i < 0xFFF; i++){
+			a++;
+		}
 		if(recv_msg_nb(&sender_tid, recv_buf, KCD_MBX_SIZE) == RTX_OK){
 			SER_PutStr(0, "User task received a message\n\r");
 		} else {
