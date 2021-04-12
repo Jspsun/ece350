@@ -180,6 +180,7 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 	#endif
 
 	#if TEST==5
+		SER_PutStr(0, "Setting up Test 5\n\r");
 		for(int i = 0; i < MAX_TASKS - 1; i++){
 			tasks[i].u_stack_size = 0x200;
 			tasks[i].ptask = &utask1;	// Change this to ktask 1/2/3
