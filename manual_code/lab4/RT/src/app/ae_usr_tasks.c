@@ -110,14 +110,14 @@ void rtask2(void)
 #if TEST==0
 void utask1(void){
 	SER_PutStr(0, "ktask3: entering \n\r");
-	printf("Task ID: %d", gp_current_task->tid);
+//	printf("Task ID: %d", gp_current_task->tid);
 	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
 	tsk_done_rt();
 }
 
 void utask2(void){
-	SER_PutStr(0, "ktask3: entering \n\r");
-	printf("Task ID: %d", gp_current_task->tid);
+	SER_PutStr(0, "ktask4: entering \n\r");
+//	printf("Task ID: %d", gp_current_task->tid);
 	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
 	tsk_done_rt();
 }

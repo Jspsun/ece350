@@ -266,22 +266,6 @@ void decrease_key(TCB* heap[], int i) {
     }
 }
 
-int insert(TCB* value) {
-	value->rt_finished = 0;
-
-    if (current_size + 1== h_array_size) {
-        return -1;
-    }
-
-    g_task_count += 1;
-    (*value).task_count = g_task_count;
-    heap[current_size] = value;
-    increase_key(heap, current_size);
-    current_size ++;
-
-    return 0;
-}
-
 int16_t maximum(TCB* heap[]) {
     return current_size == 0 ? -1 : heap[0]->tid;
 }
@@ -307,6 +291,26 @@ int find_value(TCB* heap[], U8 tid) {
     }
 
     return -1;
+}
+
+int insert(TCB* value) {
+	if (find_value(heap, value->tid) >= 0 || gp_current_task == value) {
+		return -1;
+	}
+
+	value->rt_finished = 0;
+
+    if (current_size + 1== h_array_size) {
+        return -1;
+    }
+
+    g_task_count += 1;
+    (*value).task_count = g_task_count;
+    heap[current_size] = value;
+    increase_key(heap, current_size);
+    current_size ++;
+
+    return 0;
 }
 
 void reset_priority(TCB* heap[], U8 tid, U8 priority) {
@@ -361,8 +365,6 @@ int currently_running() {
 
 TCB *scheduler(void)
 {
-    TIMEVAL now = get_system_time();
-    update(now);
 	int16_t tid = maximum(heap);
 	//int16_t tid = extract_max(heap);
 	if (tid < 0) { return gp_current_task; }
@@ -422,6 +424,7 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
     p_tcb->state    = RUNNING;
     p_tcb->mailbox  = NULL;
     p_tcb->rt_finished = 0;
+    p_tcb->was_suspended = 0;
     g_num_active_tasks++;
     gp_current_task = p_tcb;
 
@@ -431,6 +434,7 @@ int k_tsk_init(RTX_TASK_INFO *task_info, int num_tasks)
         g_tcbs[i].tid = i;
         g_tcbs[i].mailbox = NULL;
         g_tcbs[i].rt_finished = 0;
+        g_tcbs[i].was_suspended = 0;
     }
 
     // create the rest of the tasks
@@ -638,6 +642,55 @@ K_RESTORE
         POP     {R0-R12, PC}
 }
 
+__asm void k_tsk_reset()
+{
+    	PUSH    {R0-R12, LR}
+    	LDR     R1, =__cpp(&gp_current_task);
+    	LDR     R2, [R1]
+		LDR     SP, [R2, #TCB_MSP_OFFSET]   ; restore msp of the gp_current_task
+	    POP     {R0-R12, PC}
+}
+
+int k_tsk_run_new_no_update(void)
+{
+    TCB *p_tcb_old = NULL;
+
+    if (gp_current_task == NULL) {
+    	return RTX_ERR;
+    }
+
+    p_tcb_old = gp_current_task;
+    gp_current_task = scheduler();
+
+    if ( gp_current_task == NULL  ) {
+        gp_current_task = p_tcb_old;        // revert back to the old task
+        return RTX_ERR;
+    }
+
+    printf("Entering k_tsk_run_new\n\r");
+
+    // at this point, gp_current_task != NULL and p_tcb_old != NULL
+    if (gp_current_task != p_tcb_old) {
+    	gp_current_task->state = RUNNING;   // change state of the to-be-switched-in  tcb
+    	if(p_tcb_old->state != DORMANT &&
+    	   p_tcb_old->state != BLK_MSG &&
+		   p_tcb_old->state != SUSPENDED){
+            p_tcb_old->state = READY;       // change state of the to-be-switched-out tcb
+    	}
+
+    	if (gp_current_task->prio == PRIO_RT && gp_current_task->priv == 1 && !gp_current_task->was_suspended) {
+    		gp_current_task->msp = gp_current_task->initial_msp;
+    		printf("Resetting msp\n\r");
+    	}
+
+    	gp_current_task->was_suspended = 0;
+
+        k_tsk_switch(p_tcb_old);            // switch stacks
+    }
+
+    return RTX_OK;
+}
+
 
 /**************************************************************************//**
  * @brief       run a new thread. The caller becomes READY and
@@ -657,6 +710,9 @@ int k_tsk_run_new(void)
     	return RTX_ERR;
     }
 
+    TIMEVAL now = get_system_time();
+    update(now);
+
     p_tcb_old = gp_current_task;
     gp_current_task = scheduler();
     
@@ -664,6 +720,8 @@ int k_tsk_run_new(void)
         gp_current_task = p_tcb_old;        // revert back to the old task
         return RTX_ERR;
     }
+
+    printf("Entering k_tsk_run_new\n\r");
 
     // at this point, gp_current_task != NULL and p_tcb_old != NULL
     if (gp_current_task != p_tcb_old) {
@@ -674,9 +732,13 @@ int k_tsk_run_new(void)
             p_tcb_old->state = READY;       // change state of the to-be-switched-out tcb
     	}
 
-    	if (gp_current_task->prio == PRIO_RT && gp_current_task->priv == 1) {
+    	if (gp_current_task->prio == PRIO_RT && gp_current_task->priv == 1 && !gp_current_task->was_suspended) {
     		gp_current_task->msp = gp_current_task->initial_msp;
+    		printf("Resetting msp\n\r");
     	}
+
+    	gp_current_task->was_suspended = 0;
+
         k_tsk_switch(p_tcb_old);            // switch stacks
     }
 
@@ -1053,7 +1115,7 @@ void k_tsk_done_rt(void) {
     k_tsk_get(gp_current_task->tid, &info);
 
     // TODO: logic for suspended
-    edf_done(gp_current_task->tid);
+    int ret_val = edf_done(gp_current_task->tid);
 
     U32* sp = (U32*)info.k_stack_hi;;
 
@@ -1079,7 +1141,27 @@ void k_tsk_done_rt(void) {
 
     gp_current_task->msp = sp;
 
-    k_tsk_run_new();
+    if (ret_val == 0) {
+        k_tsk_run_new_no_update();
+    } else {
+    	int16_t tid = maximum(heap);
+    	//int16_t tid = extract_max(heap);
+    	if (tid < 0) {
+    		k_tsk_reset();
+    		return;
+    	}
+
+    	TCB* current_tcb = gp_current_task;
+    	TCB* max_ready_tcb = &g_tcbs[(U8)tid];
+
+    	if (compare(current_tcb, max_ready_tcb)) {
+    		k_tsk_reset();
+    		return;
+    	}
+
+    	k_tsk_run_new_no_update();
+    }
+
 
     return;
 }
@@ -1093,7 +1175,7 @@ void k_tsk_suspend(struct timeval_rt *tv)
 
     edf_suspend(gp_current_task->tid, *tv);
 
-    k_tsk_run_new();
+	k_tsk_run_new_no_update();
 
     return;
 }

@@ -222,19 +222,21 @@ void edf_remove(task_t tid) {
 void edf_suspend(task_t tid, TIMEVAL suspend_time) {
 
 	TIMEVAL time = get_system_time();
+	update(time);
 	TIMEVAL new_wakeup = increment_tv(time, suspend_time);
 
 	edf_array[tid].suspended = 1;
 	g_tcbs[tid].state = SUSPENDED;
+	g_tcbs[tid].was_suspended = 1;
 	event_suspend(tid, new_wakeup);
 }
 
 int edf_done(task_t tid) {
 	TIMEVAL time = get_system_time();
+	update(time);
 	edf_array[tid].job_count += 1;
 
 	TCB* tcb = &g_tcbs[tid];
-	tcb->rt_finished = 1;
 
 	if (edf_array[tid].job_count <= edf_array[tid].deadline_count) {
 		// missed deadline, reinsert and try running right away
@@ -243,11 +245,11 @@ int edf_done(task_t tid) {
 		// printf("Missed deadline for job %d, task %d\n\r", edf_array[tid].job_count, tid);
 		printf("Job %d of task %d missed its deadline\n\r", edf_array[tid].job_count, tid);
 		printf("Time: %d, %d\n\r", system_time.sec, system_time.usec);
-		insert(tcb);
 		return 1;
 	}
 	// suspend
 
+	tcb->rt_finished = 1;
 	g_tcbs[tid].state = SUSPENDED;
 	edf_array[tid].suspended = 1;
 	event_suspend(tid, edf_array[tid].deadline);
