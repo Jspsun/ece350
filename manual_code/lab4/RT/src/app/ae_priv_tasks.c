@@ -133,30 +133,33 @@ void ktask5(void) {
 
 void ktask1(void) {
 	SER_PutStr(0, "ktask1: entering \n\r");
-	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	printf("Suspending for 0.3 seconds");
 	TIMEVAL temp;
 	temp.sec = 0;
 	temp.usec = 300000;
 	k_tsk_suspend(temp);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	k_tsk_done_rt();
 }
 
 void ktask2(void) {
 	SER_PutStr(0, "ktask2: entering \n\r");
-	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	printf("Suspending for 0.6 seconds");
 	TIMEVAL temp;
 	temp.sec = 0;
 	temp.usec = 300000;
 	k_tsk_suspend(temp);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	k_tsk_done_rt();
 }
 
 void ktask3(void) {
 	SER_PutStr(0, "ktask3: entering \n\r");
-	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	printf("Suspending for 0.9 seconds");
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	TIMEVAL temp;
 	temp.sec = 0;
 	temp.usec = 900000;
@@ -166,23 +169,25 @@ void ktask3(void) {
 
 void ktask4(void) {
 	SER_PutStr(0, "ktask3: entering \n\r");
-	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	printf("Suspending for 1.2 seconds");
 	TIMEVAL temp;
 	temp.sec = 1;
 	temp.usec = 200000;
 	k_tsk_suspend(temp);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	k_tsk_done_rt();
 }
 
 void ktask5(void) {
 	SER_PutStr(0, "ktask3: entering \n\r");
-	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	printf("Suspending for 3.0 seconds");
 	TIMEVAL temp;
 	temp.sec = 3;
 	temp.usec = 0;
 	k_tsk_suspend(temp);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	k_tsk_done_rt();
 }
 

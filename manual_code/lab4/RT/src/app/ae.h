@@ -45,6 +45,18 @@
 	#define init_tasks 1
 #endif
 
+#if TEST == 2
+	#define init_tasks 1
+#endif
+
+#if TEST == 3
+	#define init_tasks 1
+#endif
+
+#if TEST == 4
+	#define init_tasks 1
+#endif
+
 /*
  *===========================================================================
  *                            FUNCTION PROTOTYPES

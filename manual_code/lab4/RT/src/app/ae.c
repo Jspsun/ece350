@@ -135,7 +135,7 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 	#endif
 
 	#if TEST == 2 // Run as privledged first, then unprivileged
-		SER_PutStr(0, "Setting up Test 1\n\r");
+		SER_PutStr(0, "Setting up Test 2\n\r");
 		TIMEVAL temp;
 		temp.sec = 0;
 		temp.usec = 500000;
