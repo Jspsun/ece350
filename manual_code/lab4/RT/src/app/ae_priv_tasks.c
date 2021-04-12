@@ -258,6 +258,34 @@ void ktask5(void) {
 	}
 #endif
 
+#if TEST==6
+	void ktask1(void) {
+		SER_PutStr(0, "ktask1: entering \n\r");
+		printf("Task ID: %d, Time: %d sec %u sec\n\r", gp_current_task->tid, system_time.sec, system_time.usec);
+		k_tsk_done_rt();
+	}
+
+	void ktask2(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+
+	void ktask3(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+
+	void ktask4(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+
+	void ktask5(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+#endif
+
 /*
  *===========================================================================
  *                             END OF FILE

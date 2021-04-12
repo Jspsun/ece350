@@ -189,6 +189,21 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 		}
 	#endif
 
+	#if TEST==6
+		printf("Setting up Test 6\n\r");
+		TIMEVAL temp;
+		temp.sec = 1;
+		temp.usec = 0;
+		for(int i = 0; i < MAX_TASKS-1; i++){
+			tasks[i].u_stack_size = 0x200;
+			tasks[i].ptask = &ktask1;	// Change this to ktask 1/2/3
+			tasks[i].prio = PRIO_RT;
+			tasks[i].priv = 1;
+			tasks[i].p_n = temp;
+			tasks[i].rt_mbx_size = MIN_MBX_SIZE;
+		}
+	#endif
+
     return;
 }
 
