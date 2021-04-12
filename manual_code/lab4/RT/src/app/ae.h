@@ -58,7 +58,7 @@
 #endif
 
 #if TEST == 5
-	#define init_tasks 15
+	#define init_tasks MAX_TASKS-1
 #endif
 
 
