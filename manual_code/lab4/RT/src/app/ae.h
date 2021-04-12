@@ -35,9 +35,13 @@
 #include "ae_priv_tasks.h"
 #include "ae_usr_tasks.h"
 
-#define TEST 0
+#define TEST 1
 
 #if TEST == 0
+	#define init_tasks 1
+#endif
+
+#if TEST == 1
 	#define init_tasks 1
 #endif
 
