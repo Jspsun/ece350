@@ -191,25 +191,89 @@ void utask2(void){
 
 #if TEST==3
 void utask1(void){
-	SER_PutStr(0, "User Task 1 setting up RTX Task\n\r");
+	printf("User Task 1 setting up RTX Task\n\r");
 	TIMEVAL period;
 	period.sec = 0;
-	period.usec = 500000;
+	period.usec = 100;	// Period shorter than 500usec
 
 	TASK_RT temp;
 	temp.p_n = period;
-	temp.task_entry = &ktask1();
+	temp.task_entry = &utask2;
 	temp.u_stack_size = 0x200;
 	temp.rt_mbx_size = MIN_MBX_SIZE;
 
 	task_t tid;
 
 	if(tsk_create_rt(&tid, &temp) == RTX_ERR){
-		SER_PutStr(0, "create_rt failed as expected\n\r");
+		printf("create_rt failed as expected: %d\n\r", 1);
+	}
+
+	period.sec = 0;
+	period.usec = 600;	// Period not a multiple of 500usec
+
+	if(tsk_create_rt(&tid, &temp) == RTX_ERR){
+		printf("create_rt failed as expected: %d\n\r", 2);
+	}
+
+	period.sec = 1;
+	period.usec = 200;	// Period not a multiple of 500usec
+
+	if(tsk_create_rt(&tid, &temp) == RTX_ERR){
+		printf("create_rt failed as expected: %d\n\r", 3);
+	}
+
+	period.sec = 1;
+	period.usec = 0;
+
+	temp.p_n = period;
+	temp.task_entry = &utask2;
+	temp.u_stack_size = 0x100; // Testing stack size too small
+	temp.rt_mbx_size = MIN_MBX_SIZE;
+
+	if(tsk_create_rt(&tid, &temp) == RTX_ERR){
+		printf("create_rt failed as expected: %d\n\r", 4);
+	}
+
+	period.sec = 1;
+	period.usec = 0;
+
+	temp.p_n = period;
+	temp.task_entry = &utask2;
+	temp.u_stack_size = 0xFFFFFFFF;	// Stack size too big
+	temp.rt_mbx_size = MIN_MBX_SIZE;
+
+	if(tsk_create_rt(&tid, &temp) == RTX_ERR){
+		printf("create_rt failed as expected: %d\n\r", 5);
+	}
+
+	period.sec = 1;
+	period.usec = 0;
+
+	temp.p_n = period;
+	temp.task_entry = &utask2;
+	temp.u_stack_size = 0x200;
+	temp.rt_mbx_size = 0xFFFFFFFF;	// Mailbox size too big
+
+	if(tsk_create_rt(&tid, &temp) == RTX_ERR){
+		printf("create_rt failed as expected: %d\n\r", 6);
+	}
+
+	period.sec = 1;
+	period.usec = 0;
+
+	temp.p_n = period;
+	temp.task_entry = &utask2;
+	temp.u_stack_size = 0x200;
+	temp.rt_mbx_size = MIN_MBX_SIZE;
+
+	if(tsk_create_rt(&tid, &temp) == RTX_OK){
+		printf("create_rt succeeded as expected: %d\n\r", 7);
 	}
 
 	if(tsk_set_prio(tid, HIGH) == RTX_ERR){
-		SER_PutStr(0, "set_prio failed as expected\n\r");
+		printf("tsk_set_prio failed as expected: %d\n\r", 8);
+	} else {
+		printf("set_prio did not fail");
 	}
 
 	mbx_create(KCD_MBX_SIZE);
@@ -227,6 +291,12 @@ void utask1(void){
 }
 
 void utask2(void){
+	SER_PutStr(0, "utask2: entering \n\r");
+	printf("Suspending for 3 seconds\n\r");
+	TIMEVAL temp;
+	temp.sec = 3;
+	temp.usec = 0;
+	tsk_suspend(&temp);
 	tsk_exit();
 }
 #endif
