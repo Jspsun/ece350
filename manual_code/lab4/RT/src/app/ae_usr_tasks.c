@@ -327,6 +327,10 @@ void utask1(void){
 		printf("Task creation failed");
 	}
 
+	mbx_create(KCD_MBX_SIZE);
+	task_t sender_tid;
+	char* recv_buf = mem_alloc(KCD_MBX_SIZE);
+
 	while(1){
 		if(recv_msg_nb(&sender_tid, recv_buf, KCD_MBX_SIZE) == RTX_OK){
 			SER_PutStr(0, "User task received a message\n\r");
