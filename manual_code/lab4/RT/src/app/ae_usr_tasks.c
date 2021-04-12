@@ -324,9 +324,9 @@ void utask1(void){
 	task_t tid;
 
 	if(tsk_create_rt(&tid, &temp) == RTX_OK){
-		printf("Task Creation successful");
+		printf("Task Creation successful\n\r");
 	} else {
-		printf("Task creation failed");
+		printf("Task creation failed\n\r");
 	}
 
 	mbx_create(KCD_MBX_SIZE);
@@ -347,8 +347,8 @@ void utask1(void){
 
 void utask2(void){
 	SER_PutStr(0, "utask2: entering \n\r");
-	printf("Task ID: %d", gp_current_task->tid);
-	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("Task ID: %d\n\r", gp_current_task->tid);
+	printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
 	tsk_done_rt();
 }
 #endif
