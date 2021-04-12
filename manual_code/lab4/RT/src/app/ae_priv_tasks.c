@@ -42,6 +42,7 @@
 #include "ae_usr_tasks.h"
 #include "Serial.h"
 #include "printf.h"
+#include "ae.h"
 
 #if TEST == 0
 

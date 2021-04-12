@@ -39,6 +39,7 @@
 #include "rtx.h"
 #include "Serial.h"
 #include "printf.h"
+#include "ae.h"
 
 void check_sys_timer(void){
 	printf("check_sys_timer: entering \n\r");
@@ -109,9 +110,31 @@ void rtask2(void)
 
 #if TEST==0
 void utask1(void){
-	SER_PutStr(0, "ktask3: entering \n\r");
-//	printf("Task ID: %d", gp_current_task->tid);
-	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	printf("ktask1: entering \n\r");
+	counter += 1;
+	RTX_TASK_INFO buffer;
+	task_t tid = 1;
+
+	if(tsk_get(tid, &buffer) != RTX_OK){
+		SER_PutStr(0, "k_tsk_get failed\n\r");
+	} else {
+		if(buffer.rt_mbx_size == MIN_MBX_SIZE){
+			SER_PutStr(0, "Got the right mbx size\n\r");
+		}
+		if(buffer.p_n.sec == 1 && buffer.p_n.usec == 0){
+			SER_PutStr(0, "Got the right p_n\n\r");
+		}
+	}
+
+	printf("Attempting to change own prio %d\n\r", counter);
+
+//	SER_PutStr(0, "Attempting to change own prio\n\r");
+	if(tsk_set_prio(tid, HIGH) == RTX_ERR){
+		SER_PutStr(0, "set_prio returns RTX_ERR, as expected\n\r");
+	} else {
+		SER_PutStr(0, "set_prio did not return RTX_ERR!\n\r");
+	}
+
 	tsk_done_rt();
 }
 
@@ -125,9 +148,8 @@ void utask2(void){
 
 #if TEST==1
 void utask1(void){
-	SER_PutStr(0, "ktask3: entering \n\r");
-	printf("Task ID: %d", gp_current_task->tid);
-	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
+	SER_PutStr(0, "ktask1: entering \n\r");
+	printf("System Time: %d sec, %u sec \n\r", system_time.sec, system_time.usec);
 	tsk_done_rt();
 }
 

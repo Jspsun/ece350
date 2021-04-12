@@ -289,6 +289,7 @@ void c_IRQ_Handler(void)
 			last_checkpoint.usec = last_checkpoint.usec % 1000000;
 		}
 
+                system_time = last_checkpoint;
 		switch_flag = update(system_time);
 	}
 	else if(interrupt_ID == HPS_TIMER1_IRQ_ID)
