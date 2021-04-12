@@ -321,6 +321,8 @@ void utask1(void){
 	temp.u_stack_size = 0x200;
 	temp.rt_mbx_size = MIN_MBX_SIZE;
 
+	task_t tid;
+
 	if(tsk_create_rt(&tid, &temp) == RTX_OK){
 		printf("Task Creation successful");
 	} else {
