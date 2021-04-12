@@ -179,6 +179,15 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 		tasks[1].priv = 0;
 	#endif
 
+	#if TEST==5
+		for(int i = 0; i < MAX_TASKS - 1; i++){
+			tasks[i].u_stack_size = 0x200;
+			tasks[i].ptask = &utask1;	// Change this to ktask 1/2/3
+			tasks[i].prio = HIGH;
+			tasks[i].priv = 0;
+		}
+	#endif
+
     return;
 }
 

@@ -357,6 +357,35 @@ void utask2(void){
 }
 #endif
 
+#if TEST==5
+void utask1(void){
+	TIMEVAL period;
+	period.sec = 1;
+	period.usec = 0;
+
+	TASK_RT temp;
+	temp.p_n = period;
+	temp.task_entry = &utask2;
+	temp.u_stack_size = 0x200;
+	temp.rt_mbx_size = MIN_MBX_SIZE;
+
+	task_t tid;
+
+	if(gp_current_task->tid == 1){
+		if(tsk_create_rt(&tid, &temp) == RTX_OK){
+			printf("Task Creation successful\n\r");
+		} else {
+			printf("Task creation failed, as expected\n\r");
+		}
+	}
+	tsk_exit();
+}
+
+void utask2(void){
+	
+}
+#endif
+
 /*
  *===========================================================================
  *                             END OF FILE

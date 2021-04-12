@@ -229,7 +229,33 @@ void ktask5(void) {
 	SER_PutStr(0, "ktask3: entering \n\r");
 	k_tsk_exit();
 }
+#endif
 
+#if TEST==5
+	void ktask1(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+
+	void ktask2(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+
+	void ktask3(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+
+	void ktask4(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+
+	void ktask5(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
 #endif
 
 /*
