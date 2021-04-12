@@ -163,10 +163,22 @@ void utask2(void){
 
 #if TEST==2
 void utask1(void){
-	SER_PutStr(0, "ktask3: entering \n\r");
-	printf("Task ID: %d", gp_current_task->tid);
-	printf("System Time: %d sec, %u sec", system_time.sec, system_time.usec);
-	tsk_done_rt();
+	SER_PutStr(0, "utask1: entering \n\r");
+	// printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
+	if(numDeadlines == 0){
+		printf("Suspending for 3 seconds\n\r");
+		TIMEVAL temp;
+		temp.sec = 3;
+		temp.usec = 0;
+		tsk_suspend(&temp);
+	}
+	printf("Deadline %d Completion Time: %d %d\n\r", numDeadlines, system_time.sec, system_time.usec);
+	numDeadlines++;
+	if(numDeadlines == 10){
+		tsk_exit();
+	} else {
+		tsk_done_rt();
+	}
 }
 
 void utask2(void){

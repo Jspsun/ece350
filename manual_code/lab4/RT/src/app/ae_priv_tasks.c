@@ -134,11 +134,13 @@ static int numDeadlines = 0;
 void ktask1(void) {
 	SER_PutStr(0, "ktask1: entering \n\r");
 	// printf("System Time: %d sec, %u sec\n\r", system_time.sec, system_time.usec);
-	printf("Suspending for 3 seconds");
-	TIMEVAL temp;
-	temp.sec = 3;
-	temp.usec = 0;
-	k_tsk_suspend(&temp);
+	if(numDeadlines == 0){
+		printf("Suspending for 3 seconds\n\r");
+		TIMEVAL temp;
+		temp.sec = 3;
+		temp.usec = 0;
+		k_tsk_suspend(&temp);
+	}
 	printf("Deadline %d Completion Time: %d %d\n\r", numDeadlines, system_time.sec, system_time.usec);
 	numDeadlines++;
 	if(numDeadlines == 10){
