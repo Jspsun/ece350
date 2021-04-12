@@ -278,15 +278,15 @@ void c_IRQ_Handler(void)
 			SER_PutStr(1, "a9 Rolled Over\r\n");
 		}
 
-		system_time.usec = system_time.usec + a9_delta;
+		last_checkpoint.usec += a9_delta;
 
 		// update a9_timer_last
 		a9_timer_last = a9_timer_curr;
 
 		// fix overflow (1 s = 1,000,000 us)
-		if(system_time.usec > 1000000) {
-			system_time.sec += system_time.usec / 1000000;
-			system_time.usec = system_time.usec % 1000000;
+		if(last_checkpoint.usec > 1000000) {
+			last_checkpoint.sec += last_checkpoint.usec / 1000000;
+			last_checkpoint.usec = last_checkpoint.usec % 1000000;
 		}
 
 		switch_flag = update(system_time);

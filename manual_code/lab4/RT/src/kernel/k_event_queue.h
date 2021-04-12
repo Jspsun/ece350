@@ -19,6 +19,7 @@
  */
 
 extern TIMEVAL system_time;
+extern TIMEVAL last_checkpoint;
 extern TIMEVAL get_system_time(void);
 
 typedef struct Event {

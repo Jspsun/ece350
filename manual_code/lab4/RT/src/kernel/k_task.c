@@ -69,6 +69,7 @@ TCB             g_tcbs[MAX_TASKS];			// an array of TCBs
 RTX_TASK_INFO   g_null_task_info;			// The null task info
 U32             g_num_active_tasks = 0;		// number of non-dormant tasks
 
+TIMEVAL last_checkpoint;
 TIMEVAL	system_time;
 unsigned int a9_timer_last = 0xFFFFFFFF; // the initial value of free-running timer
 
@@ -151,19 +152,21 @@ TIMEVAL increment_tv(TIMEVAL t1, TIMEVAL t2) {
 	return t;
 }
 
+static int time_counter = 1;
+
 TIMEVAL get_system_time() {
     a9_timer_curr = timer_get_current_val(2);	//get the current value of the free running timer
     
     // a9_delta: time elapsed since start of previous HPS0 interrupt
-    if(a9_timer_curr < a9_timer_last){
+    if(a9_timer_curr <= a9_timer_last){
         a9_delta = a9_timer_last - a9_timer_curr;
     } else {
         a9_delta = a9_timer_last + (0xFFFFFFFF - a9_timer_curr);
     }
 
     TIMEVAL curr_time;
-    curr_time.sec = system_time.sec;
-    curr_time.usec = system_time.usec + a9_delta;
+    curr_time.sec = last_checkpoint.sec;
+    curr_time.usec = last_checkpoint.usec + a9_delta;
 
     // fix overflow (1 s = 1,000,000 us)
     if(curr_time.usec > 1000000) {
@@ -172,6 +175,15 @@ TIMEVAL get_system_time() {
     }
 
     system_time = curr_time;
+
+    time_counter += 1;
+
+   // printf("Current time: %d, %d\n\r", curr_time.sec, curr_time.usec);
+
+    if (time_counter % 10 == 0) {
+    	int j = 0;
+    	int i = 1;
+    }
 
     return curr_time;
 }
@@ -667,8 +679,6 @@ int k_tsk_run_new_no_update(void)
         return RTX_ERR;
     }
 
-    printf("Entering k_tsk_run_new\n\r");
-
     // at this point, gp_current_task != NULL and p_tcb_old != NULL
     if (gp_current_task != p_tcb_old) {
     	gp_current_task->state = RUNNING;   // change state of the to-be-switched-in  tcb
@@ -720,8 +730,6 @@ int k_tsk_run_new(void)
         gp_current_task = p_tcb_old;        // revert back to the old task
         return RTX_ERR;
     }
-
-    printf("Entering k_tsk_run_new\n\r");
 
     // at this point, gp_current_task != NULL and p_tcb_old != NULL
     if (gp_current_task != p_tcb_old) {

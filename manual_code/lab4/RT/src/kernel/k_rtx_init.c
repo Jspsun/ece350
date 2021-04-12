@@ -56,6 +56,9 @@ int k_rtx_init(RTX_TASK_INFO *task_info, int num_tasks)
     system_time.sec = 0;
     system_time.usec = 0;
 
+    last_checkpoint.sec = 0;
+    last_checkpoint.usec = 0;
+
     // A9 timer: 5ns/CC
     // Set A9 timer to count down from 0xFFFFFFFF every 1 us
     // With this setting, A9 timer resets every ~1.2 hrs

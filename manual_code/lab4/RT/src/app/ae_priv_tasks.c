@@ -45,8 +45,11 @@
 
 #if TEST == 0
 
+static int counter = 0;
+
 void ktask1(void) {
 	SER_PutStr(0, "ktask1: entering \n\r");
+	counter += 1;
 	RTX_TASK_INFO buffer;
 	task_t tid = 1;
 
@@ -61,7 +64,9 @@ void ktask1(void) {
 		}
 	}
 
-	SER_PutStr(0, "Attempting to change own prio\n\r");
+	printf("Attempting to change own prio %d\n\r", counter);
+
+//	SER_PutStr(0, "Attempting to change own prio\n\r");
 	if(k_tsk_set_prio(tid, HIGH) == RTX_ERR){
 		SER_PutStr(0, "set_prio returns RTX_ERR, as expected\n\r");
 	} else {
