@@ -291,6 +291,52 @@ void ktask5(void) {
 	}
 #endif
 
+#if TEST==7
+	void ktask1(void) {
+		RTX_MSG_CHAR message;
+		message.hdr.length = sizeof(RTX_MSG_CHAR);
+		message.hdr.type = KCD_REG;
+		message.data = 'a';
+
+		if(send_msg(TID_KCD, message) != RTX_OK){
+			printf("registration error");
+		}
+
+		printf("ktask1: entering \n\r");
+		printf("Task ID: %d, Time: %d sec %u sec\n\r", gp_current_task->tid, system_time.sec, system_time.usec);
+
+		task_t sender_tid;
+		char* recv_buf = mem_alloc(KCD_MBX_SIZE);
+
+		if(k_recv_msg_nb(&sender_tid, recv_buf, KCD_MBX_SIZE) == RTX_OK){
+			printf("User task received a message\n\r");
+		} else {
+			printf("Checked mailbox, it was empty\n\r");
+		}
+		k_tsk_done_rt();
+	}
+
+	void ktask2(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+
+	void ktask3(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+
+	void ktask4(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+
+	void ktask5(void) {
+		SER_PutStr(0, "ktask3: entering \n\r");
+		k_tsk_exit();
+	}
+#endif
+
 /*
  *===========================================================================
  *                             END OF FILE

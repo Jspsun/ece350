@@ -35,7 +35,7 @@
 #include "ae_priv_tasks.h"
 #include "ae_usr_tasks.h"
 
-#define TEST 6
+#define TEST 7
 
 #if TEST == 0
 	#define init_tasks 1
@@ -63,6 +63,10 @@
 
 #if TEST==6
     #define init_tasks MAX_TASKS-1
+#endif
+
+#if TEST==7
+    #define init_tasks 2
 #endif
 
 /*

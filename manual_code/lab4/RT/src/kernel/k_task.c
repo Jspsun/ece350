@@ -1119,13 +1119,17 @@ void k_tsk_done_rt(void) {
     printf("k_tsk_done: Entering\r\n");
 #endif /* DEBUG_0 */
 
+    if(gp_current_task->prio != PRIO_RT){
+        return;
+    }
+
     RTX_TASK_INFO info;
     k_tsk_get(gp_current_task->tid, &info);
 
     // TODO: logic for suspended
     int ret_val = edf_done(gp_current_task->tid);
 
-    U32* sp = (U32*)info.k_stack_hi;;
+    U32* sp = (U32*)info.k_stack_hi;
 
     if (gp_current_task->priv == 0) {
     	// Walk through sp to reset values
