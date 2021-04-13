@@ -294,11 +294,11 @@ void ktask5(void) {
 #if TEST==7
 	void ktask1(void) {
 		RTX_MSG_CHAR message;
-		message.hdr.length = sizeof(RTX_MSG_CHAR);
+		message.hdr.length = sizeof(RTX_MSG_HDR) + 1;
 		message.hdr.type = KCD_REG;
 		message.data = 'a';
 
-		if(send_msg(TID_KCD, &message) != RTX_OK){
+		if(k_send_msg(TID_KCD, &message) != RTX_OK){
 			printf("registration error");
 		}
 
