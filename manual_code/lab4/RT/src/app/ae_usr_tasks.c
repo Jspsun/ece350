@@ -392,7 +392,19 @@ void utask2(void){
 		printf("Task ID: %d, Time: %d sec %u sec\n\r", gp_current_task->tid, system_time.sec, system_time.usec);
 		tsk_done_rt();
 	}
+
+	void utask2(void){
 	
+	}
+#endif
+
+#if TEST==7
+	void utask1(void) {
+		SER_PutStr(0, "utask1: entering \n\r");
+		printf("Task ID: %d, Time: %d sec %u sec\n\r", gp_current_task->tid, system_time.sec, system_time.usec);
+		tsk_done_rt();
+	}
+
 	void utask2(void){
 	
 	}

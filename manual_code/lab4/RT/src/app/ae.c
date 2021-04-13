@@ -204,6 +204,26 @@ void ae_set_task_info(RTX_TASK_INFO *tasks, int num_tasks) {
 		}
 	#endif
 
+	#if TEST==7
+		printf("Setting up Test 7\n\r");
+
+		TIMEVAL temp;
+		temp.sec = 5;
+		temp.usec = 0;
+		tasks[0].u_stack_size = 0x200;
+		tasks[0].ptask = &ktask1;
+		tasks[0].prio = PRIO_RT;
+		tasks[0].priv = 1;
+		tasks[0].p_n = temp;
+		tasks[0].rt_mbx_size = KCD_MBX_SIZE;
+
+    	tasks[1].prio = HIGH;
+    	tasks[1].priv = 0;
+    	tasks[1].ptask = &kcd_task;
+    	tasks[1].k_stack_size = 0x200;
+    	tasks[1].u_stack_size = 0x200;
+	#endif 
+
     return;
 }
 
