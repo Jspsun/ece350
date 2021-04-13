@@ -872,6 +872,8 @@ void k_tsk_exit(void)
     }
 
     if (p_tcb_old->prio == PRIO_RT) {
+    	get_system_time();
+    	update(system_time);
     	edf_remove(p_tcb_old->tid);
     	// TODO: Check deadline against timer!
     }

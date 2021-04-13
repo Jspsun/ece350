@@ -409,6 +409,30 @@ void utask2(void){
 	
 	}
 #endif
+#if TEST==8
+	static int counter_c = 0;
+	void utask1(void) {
+		SER_PutStr(0, "utask1: entering \n\r");
+
+		int x = 0xFFFFFFF;
+		for (int i = 0; i < x; i++) {
+			int a = i;
+		}
+
+		printf("Task ID: %d, Time: %d sec %u sec\n\r", gp_current_task->tid, system_time.sec, system_time.usec);
+
+		counter_c += 1;
+		if (counter_c == 1) {
+			tsk_done_rt();
+		} else {
+			tsk_exit();
+		}
+	}
+
+	void utask2(void){
+
+	}
+#endif
 
 /*
  *===========================================================================

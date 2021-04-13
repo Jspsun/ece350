@@ -216,6 +216,12 @@ void edf_insert(task_t tid, TASK_RT info) {
 }
 
 void edf_remove(task_t tid) {
+
+	while (edf_array[tid].job_count <= edf_array[tid].deadline_count) {
+		printf("Job %d of task %d missed its deadline\n\r", edf_array[tid].job_count, tid);
+		edf_array[tid].job_count += 1;
+	}
+
 	edf_array[tid].suspended = 0;
 	edf_array[tid].job_count = 0;
 	event_remove(tid);
@@ -246,7 +252,6 @@ int edf_done(task_t tid) {
 		tcb->state = READY;
 		// printf("Missed deadline for job %d, task %d\n\r", edf_array[tid].job_count, tid);
 		printf("Job %d of task %d missed its deadline\n\r", edf_array[tid].job_count, tid);
-		printf("Time: %d, %d\n\r", system_time.sec, system_time.usec);
 		return 1;
 	}
 	// suspend
