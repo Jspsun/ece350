@@ -16,7 +16,9 @@
 #define SUSPENDED_EVENT 0
 #define DEADLINE_EVENT 1
 
-static EVENT e_heap[MAX_TASKS];
+#define total_event_capacity MAX_TASKS * 2
+
+static EVENT e_heap[total_event_capacity];
 static U32 e_queue_size = 0;
 
 int e_compare(EVENT t1, EVENT t2) {
@@ -31,7 +33,7 @@ void e_swap(EVENT *t1, EVENT *t2) {
 }
 
 int e_parent(int i) {
-    return (i > 0 && i < MAX_TASKS) ? (i - 1) / 2 : -1;
+    return (i > 0 && i < total_event_capacity) ? (i - 1) / 2 : -1;
 }
 
 int e_left_child(int i) {
@@ -71,7 +73,7 @@ void e_decrease_key(EVENT heap[], int i) {
 }
 
 int e_insert(EVENT heap[], EVENT value) {
-    if (e_queue_size + 1== MAX_TASKS) {
+    if (e_queue_size + 1== total_event_capacity) {
         return -1;
     }
 

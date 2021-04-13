@@ -90,6 +90,6 @@ int compare(TCB *t1, TCB* t2);
 TIMEVAL increment_tv(TIMEVAL t1, TIMEVAL t2);
 int compare_timeval(TIMEVAL t1, TIMEVAL t2);
 TIMEVAL next_quanta(TIMEVAL time);
-static TCB* heap[MAX_TASKS];
+static TCB* heap[MAX_TASKS * 2];
 
 #endif // ! K_TASK_H_

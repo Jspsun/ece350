@@ -262,7 +262,7 @@ void ktask5(void) {
 	void ktask1(void) {
 //		SER_PutStr(0, "ktask1: entering \n\r");
 		int a;
-		if(gp_current_task->tid >= 79){
+		if(gp_current_task->tid >= 159){
 			a++;
 			printf("-----------------------------------\n\r");
 		}

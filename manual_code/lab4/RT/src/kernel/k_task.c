@@ -209,6 +209,7 @@ TIMEVAL next_quanta(TIMEVAL time) {
  *==========================================================================
  */
 
+static TCB* heap[MAX_TASKS * 2];
 static const int h_array_size = MAX_TASKS;
 static U32 current_size = 0;
 static U32 g_task_count = 0;

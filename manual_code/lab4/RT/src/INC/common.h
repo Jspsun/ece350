@@ -74,7 +74,7 @@
 #define RM_NPS              11      /* rate-Monotonic scheduling without polling server */
 #define EDF                 12      /* earliest-deadline-first scheduling */
 
-#define TID_NULL            0       /* pre-defined Task ID for null task */
+#define TID_NULL            0     /* pre-defined Task ID for null task */
 #define TID_KCD             159     /* pre-defined Task ID for KCD task */
 #define TID_UART_IRQ        0xFF    /* reserved TID for UART IRQ handler which is not a task */
 #define MAX_TASKS           160     /* maximum number of tasks in the system */

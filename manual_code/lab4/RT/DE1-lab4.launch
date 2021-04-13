@@ -1,48 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="com.arm.debugger.launcher2">
     <mapAttribute key="AverageDurationTracker">
-        <mapEntry key="*Fetching Data Model" value="297026"/>
-        <mapEntry key="*list global low level symbols" value="2585702"/>
-        <mapEntry key="*loading memory from target" value="6626497"/>
-        <mapEntry key="*loading values from target" value="3912372"/>
-        <mapEntry key="*updating registers" value="50783764"/>
+        <mapEntry key="*Fetching Data Model" value="149850"/>
+        <mapEntry key="*list global low level symbols" value="1102348"/>
+        <mapEntry key="*loading memory from target" value="3934774"/>
+        <mapEntry key="*loading values from target" value="2540068"/>
+        <mapEntry key="*updating registers" value="52786130"/>
         <mapEntry key="*updating variables" value="3670865"/>
-        <mapEntry key="AddEventObserver" value="663161"/>
-        <mapEntry key="Evaluate" value="958247"/>
+        <mapEntry key="AddEventObserver" value="26654180"/>
+        <mapEntry key="Evaluate" value="1014311"/>
         <mapEntry key="Retrieving globals list" value="14134096"/>
-        <mapEntry key="areCachesAvailable" value="391450"/>
-        <mapEntry key="break" value="4293141"/>
-        <mapEntry key="compute execution mode" value="665400"/>
-        <mapEntry key="console" value="7856122"/>
-        <mapEntry key="continue" value="5838936"/>
-        <mapEntry key="core" value="10949279"/>
-        <mapEntry key="disassemble" value="98368185"/>
+        <mapEntry key="areCachesAvailable" value="360331"/>
+        <mapEntry key="break" value="5022707"/>
+        <mapEntry key="compute execution mode" value="451859"/>
+        <mapEntry key="console" value="7276391"/>
+        <mapEntry key="continue" value="29389170"/>
+        <mapEntry key="core" value="10360289"/>
+        <mapEntry key="disassemble" value="39844776"/>
         <mapEntry key="finish" value="14140099"/>
-        <mapEntry key="get byte order" value="226010"/>
-        <mapEntry key="get capabilities" value="558362"/>
-        <mapEntry key="get execution addresss" value="697070"/>
-        <mapEntry key="get source lines" value="245026"/>
-        <mapEntry key="getValidEncodings" value="347623"/>
-        <mapEntry key="initialize command help" value="45662653"/>
-        <mapEntry key="interrupt" value="14685801"/>
-        <mapEntry key="list breakpoint options" value="94179"/>
-        <mapEntry key="list breakpoints" value="4318335"/>
-        <mapEntry key="list instruction sets" value="142939"/>
-        <mapEntry key="list signals" value="4550831"/>
-        <mapEntry key="list watchpoint options" value="159297"/>
-        <mapEntry key="list watchpoints" value="541932"/>
-        <mapEntry key="loadfile" value="222549941"/>
-        <mapEntry key="next" value="31987443"/>
+        <mapEntry key="get byte order" value="293901"/>
+        <mapEntry key="get capabilities" value="171008"/>
+        <mapEntry key="get execution addresss" value="271752"/>
+        <mapEntry key="get source lines" value="223379"/>
+        <mapEntry key="getValidEncodings" value="424065"/>
+        <mapEntry key="initialize command help" value="43976965"/>
+        <mapEntry key="interrupt" value="9425129"/>
+        <mapEntry key="list breakpoint options" value="269941"/>
+        <mapEntry key="list breakpoints" value="406894"/>
+        <mapEntry key="list instruction sets" value="134100"/>
+        <mapEntry key="list signals" value="6180073"/>
+        <mapEntry key="list watchpoint options" value="227512"/>
+        <mapEntry key="list watchpoints" value="463121"/>
+        <mapEntry key="loadfile" value="217852224"/>
+        <mapEntry key="next" value="33116936"/>
         <mapEntry key="reload-symbol-file" value="106569672"/>
-        <mapEntry key="remove" value="7104858"/>
-        <mapEntry key="set CWD" value="1335551"/>
-        <mapEntry key="set breakpoint properties" value="14590903"/>
-        <mapEntry key="set debug-from" value="1108106"/>
-        <mapEntry key="source altera_target_check.py" value="344591450"/>
-        <mapEntry key="start" value="41253935"/>
+        <mapEntry key="remove" value="7762016"/>
+        <mapEntry key="set CWD" value="2491970"/>
+        <mapEntry key="set breakpoint properties" value="8066704"/>
+        <mapEntry key="set debug-from" value="535425"/>
+        <mapEntry key="source altera_target_check.py" value="331394989"/>
+        <mapEntry key="start" value="32601666"/>
         <mapEntry key="step" value="27790059"/>
-        <mapEntry key="toggleBreakpoint" value="14361938"/>
-        <mapEntry key="waitForTargetToStop" value="8071221"/>
+        <mapEntry key="toggleBreakpoint" value="19574257"/>
+        <mapEntry key="waitForTargetToStop" value="10376017"/>
         <mapEntry key="write memory" value="10809820"/>
     </mapAttribute>
     <intAttribute key="DEBUG_TAB..RESOURCES.COUNT" value="0"/>
@@ -149,7 +149,7 @@
     <booleanAttribute key="VFS_ENABLED" value="true"/>
     <stringAttribute key="VFS_LOCAL_DIR" value="${workspace_loc}"/>
     <stringAttribute key="VFS_REMOTE_MOUNT" value="/writeable"/>
-    <stringAttribute key="breakpoints" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;breakpoints order=&quot;ALPHA&quot;&gt;&#10;&#9;&lt;breakpoint ignorecount=&quot;0&quot; threadenabled=&quot;no&quot; core_list=&quot;&quot; continue=&quot;no&quot; verboseBreakpoints=&quot;yes&quot; kind=&quot;SOURCEPOSITION&quot;&gt;&#10;&#9;&#9;&lt;master_location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; debugFile=&quot;N:/ece350w21-lab-ca9-prototype/lab3/IPC/src/kernel/main_svc_cw.c&quot; hostFile=&quot;N:\ece350w21-lab-ca9-prototype\lab3\IPC\src\kernel\main_svc_cw.c&quot; line=&quot;80&quot;/&gt;&#10;&#9;&#9;&lt;location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; debugFile=&quot;N:/ece350w21-lab-ca9-prototype/lab3/IPC/src/kernel/main_svc_cw.c&quot; hostFile=&quot;N:\ece350w21-lab-ca9-prototype\lab3\IPC\src\kernel\main_svc_cw.c&quot; line=&quot;80&quot;/&gt;&#10;&#9;&lt;/breakpoint&gt;&#10;&lt;/breakpoints&gt;&#10;"/>
+    <stringAttribute key="breakpoints" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;breakpoints order=&quot;ALPHA&quot;&gt;&#10;&#9;&lt;breakpoint ignorecount=&quot;0&quot; threadenabled=&quot;no&quot; core_list=&quot;&quot; continue=&quot;no&quot; verboseBreakpoints=&quot;yes&quot; kind=&quot;SOURCEPOSITION&quot;&gt;&#10;&#9;&#9;&lt;master_location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; debugFile=&quot;N:/ece350w21-lab-ca9-prototype/lab3/IPC/src/kernel/main_svc_cw.c&quot; hostFile=&quot;N:\ece350w21-lab-ca9-prototype\lab3\IPC\src\kernel\main_svc_cw.c&quot; line=&quot;80&quot;/&gt;&#10;&#9;&#9;&lt;location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; debugFile=&quot;N:/ece350w21-lab-ca9-prototype/lab3/IPC/src/kernel/main_svc_cw.c&quot; hostFile=&quot;N:\ece350w21-lab-ca9-prototype\lab3\IPC\src\kernel\main_svc_cw.c&quot; line=&quot;80&quot;/&gt;&#10;&#9;&lt;/breakpoint&gt;&#10;&#9;&lt;breakpoint ignorecount=&quot;0&quot; threadenabled=&quot;no&quot; core_list=&quot;&quot; continue=&quot;no&quot; verboseBreakpoints=&quot;yes&quot; kind=&quot;SOURCEPOSITION&quot;&gt;&#10;&#9;&#9;&lt;master_location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/app/ae_usr_tasks.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\app\ae_usr_tasks.c&quot; line=&quot;258&quot;/&gt;&#10;&#9;&#9;&lt;location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/app/ae_usr_tasks.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\app\ae_usr_tasks.c&quot; line=&quot;258&quot;/&gt;&#10;&#9;&lt;/breakpoint&gt;&#10;&#9;&lt;breakpoint ignorecount=&quot;0&quot; threadenabled=&quot;no&quot; core_list=&quot;&quot; continue=&quot;no&quot; verboseBreakpoints=&quot;yes&quot; kind=&quot;SOURCEPOSITION&quot;&gt;&#10;&#9;&#9;&lt;master_location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/app/ae_usr_tasks.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\app\ae_usr_tasks.c&quot; line=&quot;257&quot;/&gt;&#10;&#9;&#9;&lt;location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/app/ae_usr_tasks.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\app\ae_usr_tasks.c&quot; line=&quot;257&quot;/&gt;&#10;&#9;&lt;/breakpoint&gt;&#10;&#9;&lt;breakpoint ignorecount=&quot;0&quot; threadenabled=&quot;no&quot; core_list=&quot;&quot; continue=&quot;no&quot; verboseBreakpoints=&quot;yes&quot; kind=&quot;SOURCEPOSITION&quot;&gt;&#10;&#9;&#9;&lt;master_location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; address=&quot;S:0x0010448C&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/app/ae_priv_tasks.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\app\ae_priv_tasks.c&quot; line=&quot;267&quot; function=&quot;ktask1&quot;/&gt;&#10;&#9;&#9;&lt;location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; address=&quot;S:0x0010448C&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/app/ae_priv_tasks.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\app\ae_priv_tasks.c&quot; line=&quot;267&quot; function=&quot;ktask1&quot;/&gt;&#10;&#9;&lt;/breakpoint&gt;&#10;&#9;&lt;breakpoint ignorecount=&quot;0&quot; threadenabled=&quot;no&quot; core_list=&quot;&quot; continue=&quot;no&quot; verboseBreakpoints=&quot;yes&quot; kind=&quot;SOURCEPOSITION&quot;&gt;&#10;&#9;&#9;&lt;master_location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; address=&quot;S:0x0010290C&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/kernel/k_task.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\kernel\k_task.c&quot; line=&quot;692&quot; function=&quot;k_tsk_run_new_no_update&quot;/&gt;&#10;&#9;&#9;&lt;location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; address=&quot;S:0x0010290C&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/kernel/k_task.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\kernel\k_task.c&quot; line=&quot;692&quot; function=&quot;k_tsk_run_new_no_update&quot;/&gt;&#10;&#9;&#9;&lt;location index=&quot;1&quot; enabled=&quot;true&quot; version=&quot;2&quot; address=&quot;S:0x00102920&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/kernel/k_task.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\kernel\k_task.c&quot; line=&quot;692&quot; function=&quot;k_tsk_run_new_no_update&quot;/&gt;&#10;&#9;&#9;&lt;location index=&quot;2&quot; enabled=&quot;true&quot; version=&quot;2&quot; address=&quot;S:0x00102934&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/kernel/k_task.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\kernel\k_task.c&quot; line=&quot;692&quot; function=&quot;k_tsk_run_new_no_update&quot;/&gt;&#10;&#9;&lt;/breakpoint&gt;&#10;&#9;&lt;breakpoint ignorecount=&quot;0&quot; threadenabled=&quot;no&quot; core_list=&quot;&quot; continue=&quot;no&quot; verboseBreakpoints=&quot;yes&quot; kind=&quot;SOURCEPOSITION&quot;&gt;&#10;&#9;&#9;&lt;master_location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; address=&quot;S:0x00100180&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/kernel/k_task.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\kernel\k_task.c&quot; line=&quot;648&quot; function=&quot;k_tsk_switch&quot;/&gt;&#10;&#9;&#9;&lt;location index=&quot;0&quot; enabled=&quot;true&quot; version=&quot;2&quot; address=&quot;S:0x00100180&quot; debugFile=&quot;N:/ECE350/ece350/manual_code/lab4/RT/src/kernel/k_task.c&quot; hostFile=&quot;N:\ECE350\ece350\manual_code\lab4\RT\src\kernel\k_task.c&quot; line=&quot;648&quot; function=&quot;k_tsk_switch&quot;/&gt;&#10;&#9;&lt;/breakpoint&gt;&#10;&lt;/breakpoints&gt;&#10;"/>
     <listAttribute key="com.arm.debug.views.common.AddressTracker.debugger.view.DisassemblyView.addresses">
         <listEntry value="&lt;Next Instruction&gt;"/>
         <listEntry value=""/>
@@ -165,6 +165,7 @@
         <listEntry value="100"/>
     </listAttribute>
     <listAttribute key="com.arm.debug.views.common.AddressTracker.debugger.view.MemoryView.addresses">
+        <listEntry value="0x1082E8"/>
         <listEntry value=""/>
         <listEntry value="0xFFFED300"/>
         <listEntry value="0xFFFED380"/>
@@ -182,6 +183,7 @@
         <listEntry value="0xffc03000"/>
     </listAttribute>
     <listAttribute key="com.arm.debug.views.common.AddressTracker.debugger.view.MemoryView.ranges">
+        <listEntry value="1024"/>
         <listEntry value=""/>
         <listEntry value="1024"/>
         <listEntry value="1024"/>
@@ -198,7 +200,7 @@
         <listEntry value="1024"/>
         <listEntry value="1024"/>
     </listAttribute>
-    <stringAttribute key="com.arm.debug.views.debugConsole.DebugCommandLine.History" value="p heap[0]-&gt;ptask;p tcb;p tcb-&gt;rt_finished;p current_tcb;p heap;p current_size;p heap;p current_tcb;p heap;p current_size;p heap[0];p gp_current_task;p current_tcb;p current_size;p value;p value-&gt;rt_finished;p gp_current_task;p current_tcb;p value;p gp_current_task;p heap[0];p current_size;p e_queue_Size;p e_queue_size;p gp_current_task;p gp_current_task-&gt;ptask;p gp_current_task;p gp_current_task-&gt;tid;p current_size;p heap[0];p heap[0]-&gt;tid;p current_size;p gp_current_task;p gp_current_task-&gt;ptask;p heap[0];p heap[0]-&gt;ptask;p current_size;p value;p gp_current_task;p gp_current_tcb;p gp_current_task;p gp_current_task-&gt;ptask;p tcb;p gp_current_task-&gt;ptask;p tcb;p gp_current_task-&gt;ptask;p curr_time;p system_time;p curr_time;p last_checkpoint.usec"/>
+    <stringAttribute key="com.arm.debug.views.debugConsole.DebugCommandLine.History" value="p gp_current_task;p gp_current_task-&gt;tid;p current_size;p heap[0];p heap[0]-&gt;tid;p current_size;p gp_current_task;p gp_current_task-&gt;ptask;p heap[0];p heap[0]-&gt;ptask;p current_size;p value;p gp_current_task;p gp_current_tcb;p gp_current_task;p gp_current_task-&gt;ptask;p tcb;p gp_current_task-&gt;ptask;p tcb;p gp_current_task-&gt;ptask;p curr_time;p system_time;p curr_time;p last_checkpoint.usec;p total_size;p size;p total_size + size;p gp_current_task;p p_tcb_old;p p_tcb_old-&gt;ptask;p gp_current_task-&gt;ptask;p gp_current_task;p gp_current_task-&gt;msp;p gp_current_task-&gt;ptask;p gp_current_task-&gt;tid;p gp_current_task;p gp_current_task-&gt;msp;p gp_current_task-&gt;tid;p gp_current_task-&gt;ptask;p gp_current_task;p gp_current_task-&gt;ptask;p gp_current_task-&gt;msp;p gp_current_task-&gt;initial_msp;p gp_current_task;p gp_current_task-&gt;tid;p gp_current_task-&gt;msp;p *gp_current_task-&gt;msp;p gp_current_task-&gt;msp;p gp_current_task-&gt;tid;p gp_current_task-&gt;msp"/>
     <stringAttribute key="config_db_activity_name" value="Debug Cortex-A9_0"/>
     <stringAttribute key="config_db_connection_keys" value="rvi_address target_initialization_script dtsl_config dtsl_tracecapture_option dtsl_config_script config_file setup TCP_KILL_ON_EXIT TCP_DISABLE_EXTENDED_MODE"/>
     <stringAttribute key="config_db_connection_type" value="Bare Metal Debug"/>
@@ -223,8 +225,8 @@
     </listAttribute>
     <stringAttribute key="debugger.view.MemoryView" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;page&gt;&#10;&#9;&lt;memoryView/&gt;&#10;&lt;/page&gt;&#10;"/>
     <listAttribute key="debugger.view.MemoryView:current">
-        <listEntry value=""/>
-        <listEntry value=""/>
+        <listEntry value="0x1082E8"/>
+        <listEntry value="1024"/>
     </listAttribute>
     <stringAttribute key="debugger.view.NewRegisterView:DebugOutlineColumnState" value="OutlineConfig1&#9;8&#9;0&#9;true&#9;true&#9;49&#9;-1&#9;true&#9;1&#9;false&#9;true&#9;109&#9;-1&#9;true&#9;2&#9;true&#9;true&#9;45&#9;-1&#9;true&#9;3&#9;false&#9;true&#9;47&#9;-1&#9;true&#9;4&#9;false&#9;true&#9;56&#9;-1&#9;true&#9;5&#9;true&#9;true&#9;37&#9;-1&#9;true&#9;6&#9;false&#9;true&#9;74&#9;-1&#9;true&#9;7&#9;true&#9;true&#9;53&#9;-1&#9;true"/>
     <stringAttribute key="debugger.view.NewRegisterView:_selectedRegisterSet" value="All registers"/>
