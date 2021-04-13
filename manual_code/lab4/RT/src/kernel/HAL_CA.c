@@ -275,7 +275,7 @@ void c_IRQ_Handler(void)
 		} else {
 			a9_delta = a9_timer_last + (0xFFFFFFFF - a9_timer_curr);
 		// a9_delta = a9_timer_last + (30000000 - a9_timer_curr);
-			SER_PutStr(1, "a9 Rolled Over\r\n");
+			// SER_PutStr(1, "a9 Rolled Over\r\n");
 		}
 
 		last_checkpoint.usec += a9_delta;

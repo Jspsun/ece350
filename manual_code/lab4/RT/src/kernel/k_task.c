@@ -691,7 +691,7 @@ int k_tsk_run_new_no_update(void)
 
     	if (gp_current_task->prio == PRIO_RT && gp_current_task->priv == 1 && !gp_current_task->was_suspended) {
     		gp_current_task->msp = gp_current_task->initial_msp;
-    		printf("Resetting msp\n\r");
+    		// printf("Resetting msp\n\r");
     	}
 
     	gp_current_task->was_suspended = 0;
@@ -743,7 +743,7 @@ int k_tsk_run_new(void)
 
     	if (gp_current_task->prio == PRIO_RT && gp_current_task->priv == 1 && !gp_current_task->was_suspended) {
     		gp_current_task->msp = gp_current_task->initial_msp;
-    		printf("Resetting msp\n\r");
+    		// printf("Resetting msp\n\r");
     	}
 
     	gp_current_task->was_suspended = 0;
