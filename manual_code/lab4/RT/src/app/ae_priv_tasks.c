@@ -298,7 +298,7 @@ void ktask5(void) {
 		message.hdr.type = KCD_REG;
 		message.data = 'a';
 
-		if(send_msg(TID_KCD, message) != RTX_OK){
+		if(send_msg(TID_KCD, &message) != RTX_OK){
 			printf("registration error");
 		}
 

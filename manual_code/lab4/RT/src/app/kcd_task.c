@@ -106,7 +106,7 @@ void kcd_task(void)
 
 			// store it in cmd_reg
 			cmd_reg[index] = sender_tid;
-			// SER_PutStr(0, "Reg: Successfully registered something\r\n");
+			printf("Successfully registered %a to TID %d", cmd_id, sender_tid);
 
 		} else if (msg_hdr->type == KEY_IN){
 			// Keyboard Input
