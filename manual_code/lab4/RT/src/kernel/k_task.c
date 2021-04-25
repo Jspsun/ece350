@@ -1062,7 +1062,18 @@ void k_tsk_unblock (TCB *task) {
 
 int k_tsk_create_rt_priv(task_t *tid, TASK_RT *task, int priv)
 {
+    // TID pointer NULL
+    if (tid == NULL){
+        return RTX_ERR;
+    }
+
+    // Task entry pointer NULL
+    if (task->task_entry == NULL){
+        return RTX_ERR;
+    }
+
 	if (task->p_n.usec % 500 != 0        ||
+        task->p_n.usec < 500 && task->p_n.sec == 0 ||
 	    !task->task_entry                ||
 		g_num_active_tasks == MAX_TASKS  ||
 		validate_stack_size(task->u_stack_size) == RTX_ERR) {
