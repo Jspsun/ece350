@@ -81,7 +81,6 @@ int main()
         gp_current_task = NULL;
         k_rtx_init(task_info, init_tasks);
     }
-
     task_null();
 
     // We should never reach here!!!

@@ -3,7 +3,7 @@
  *
  *                  UNIVERSITY OF WATERLOO ECE 350 RTOS LAB
  *
- *                     Copyright 2020-2021 Yiqing Huang
+ *                 Copyright 2020-2021 ECE 350 Teaching Team
  *                          All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -26,24 +26,17 @@
  ****************************************************************************
  */
 
-/**************************************************************************//**
- * @file        usr_task.h
- * @brief       Two user tasks header file
- *
- * @version     V1.2021.01
- * @authors     Yiqing Huang
- * @date        2021 JAN
- *
- *****************************************************************************/
-
 #ifndef USR_TASK_H_
 #define USR_TASK_H_
 
 void utask1(void);
 void utask2(void);
+void utask3(void);
 
-void check_sys_timer(void);
-void check_sys_timer_after_SVC(void);
+void rt_utask1(void);
+void rt_utask2(void);
+void rt_utask3(void);
+
 
 #endif // ! USR_TASK_H_
 

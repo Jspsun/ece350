@@ -3,7 +3,7 @@
  *
  *                  UNIVERSITY OF WATERLOO ECE 350 RTOS LAB
  *
- *                     Copyright 2020-2021 Yiqing Huang
+ *                 Copyright 2020-2021 ECE 350 Teaching Team
  *                          All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,16 @@
  ****************************************************************************
  */
 
-/**************************************************************************//**
- * @file        priv_tasks.h
- * @brief       Two privileged tasks header file
- *
- * @version     V1.2021.01
- * @authors     Yiqing Huang
- * @date        2021 JAN
- *
- *****************************************************************************/
-
 #ifndef PRIV_TASKS_H_
 #define PRIV_TASKS_H_
 
 #include "k_rtx.h"
 #include "rtx.h"
 
-/*
- *===========================================================================
- *                             MACROS
- *===========================================================================
- */
-#define DELAY 5000000
-
-/*
- *===========================================================================
- *                            FUNCTION PROTOTYPES
- *===========================================================================
- */
-extern void task1(void);
-
-void ktask1     (void);
-void ktask2     (void);
-void ktask3     (void);
-void ktask4     (void);
-void ktask5     (void);
-
+void ktask1(void);
+void ktask2(void);
+void ktask3(void);
+void rt_ktask1  (void);
 #endif // ! PRIV_TASKS_H_
 /*
  *===========================================================================
