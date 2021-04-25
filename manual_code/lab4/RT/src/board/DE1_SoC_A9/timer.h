@@ -44,6 +44,7 @@
 
 #define SP0_TIMER_BASE  0xFFC08000
 #define SP1_TIMER_BASE  0xFFC09000
+#define OSC0_TIMER_BASE 0xFFD00000
 #define ARM0_TIMER_BASE 0xFFFEC600
 
 typedef unsigned        char uint8_t;
@@ -88,5 +89,6 @@ void TIMER1_Interrupt(void);
 #define TIMER0 ((timer_t *)SP0_TIMER_BASE)
 #define TIMER1 ((timer_t *)SP1_TIMER_BASE)
 #define ARMTIMER ((arm_timer_t *) ARM0_TIMER_BASE)
+#define OSCTIMER0 ((timer_t *) OSC0_TIMER_BASE)
 
 #endif

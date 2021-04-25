@@ -44,7 +44,7 @@
 timer_t* TIMERS[2] = {TIMER0, TIMER1};
 void config_hps_timer(int n, int count, int mode, int irq_mask)
 {
-	if (n < 2)
+	if (n < 2 || n == 3)
 	{
 		timer_disable(n);
 		timer_set_count(n,count);
@@ -69,6 +69,8 @@ void timer_disable(int n)
 		TIMERS[n]->timer1controlreg &= ~(0x1);
 	else if (n == 2)
 		ARMTIMER->controlreg &= ~(0x1);
+	else if (n == 3)
+		OSCTIMER0->timer1controlreg &= ~(0x1);
 }
 void timer_enable(int n)
 {
@@ -77,6 +79,8 @@ void timer_enable(int n)
 		TIMERS[n]->timer1controlreg |= 0x1;
 	else if(n == 2)
 		ARMTIMER->controlreg |= 0x1;
+	else if(n == 3)
+		OSCTIMER0->timer1controlreg |= 0x1;
 }
 void timer_set_mode(int n, int mode)
 {
@@ -88,6 +92,8 @@ void timer_set_mode(int n, int mode)
 		else if(n == 2)
 			//Set bit 1 of the control register to 0 to set the mode to one-time mode
 			ARMTIMER->controlreg &= ~(0x2);
+		else if(n == 3)
+			OSCTIMER0->timer1controlreg &= ~(0x2);
 	}
 	else if(mode == 1)
 	{
@@ -97,6 +103,8 @@ void timer_set_mode(int n, int mode)
 		else if(n == 2)
 			//Set bit 1 of the control register to 1 to set the mode to auto mode
 			ARMTIMER->controlreg |= 0x2;
+		else if(n == 3)
+			OSCTIMER0->timer1controlreg |= 0x2;
 	}
 }
 void timer_set_count(int n, int count)
@@ -106,6 +114,8 @@ void timer_set_count(int n, int count)
 		TIMERS[n]->timer1loadcount = count;
 	else if(n == 2)
 		ARMTIMER->loadcount = count;
+	else if(n == 3)
+		OSCTIMER0->timer1loadcount = count;
 }
 void timer_clear_irq(int n)
 {
@@ -114,6 +124,8 @@ void timer_clear_irq(int n)
 		t = TIMERS[n]->timer1eoi; //Read the EOI register to clear the IRQ
 	else if(n == 2)
 		ARMTIMER->intstat = 0x1;  //Write to the interrupt status register to clear the IRQ
+	else if(n == 3)
+		t = OSCTIMER0->timer1eoi;
 }
 unsigned int timer_get_current_val(int n)
 {
@@ -122,6 +134,8 @@ unsigned int timer_get_current_val(int n)
 		return TIMERS[n]->timer1currentval;
 	else if(n == 2)
 		return ARMTIMER->currentval;
+	else if(n == 3)
+		return OSCTIMER0->timer1currentval;
 	return 0;
 }
 
@@ -136,6 +150,17 @@ void hps_timer_set_irq_mask(int n, int irq_mask)
 		else if(irq_mask == 1)
 		{
 			TIMERS[n]->timer1controlreg |= 0x4;     //Set bit 2 of the control register to 1 to enable interrupt mask (disable interrupt).
+		}
+	}
+	else if(n == 3)
+	{
+		if(irq_mask == 0)
+		{
+			OSCTIMER0->timer1controlreg &= ~(0x4);  //Set bit 2 of the control register to 0 to disable interrupt mask (enable interrupt).
+		}
+		else if(irq_mask == 1)
+		{
+			OSCTIMER0->timer1controlreg |= 0x4;     //Set bit 2 of the control register to 1 to enable interrupt mask (disable interrupt).
 		}
 	}
 }

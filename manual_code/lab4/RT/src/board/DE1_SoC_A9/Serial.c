@@ -38,6 +38,43 @@
 #include "../DE1_SoC_A9/Serial.h"
 
 
+__asm void SER_Dummy(void) {
+	ARM
+	PUSH	{LR}
+	POP		{PC}
+}
+
+void SER_PutNum (int a) {
+	if (a < 10)
+		SER_PutChar(0, '0' + a);
+	else if (a < 20) {
+		SER_PutChar(0, '1');
+		SER_PutChar(0, '0' + a - 10);
+	} else if (a < 30) {
+		SER_PutChar(0, '2');
+		SER_PutChar(0, '0' + a - 20);
+	} else {
+		SER_PutStr(0, "[SER ERROR] Too large!\r\n");
+	}
+}
+
+
+void SER_Printf(char * string, int a) {
+	int i = 0;
+	char flag = 0;
+	while (string[i] != 0) {
+		if (string[i] == '%')
+			flag = 1;
+		else if (flag == 1) {
+			SER_PutNum(a);
+			flag = 0;
+		} else {
+			SER_PutChar(0, string[i]);
+		}
+		i++;
+	}
+}
+
 /*----------------------------------------------------------------------------
   Write String to Serial Port
  *----------------------------------------------------------------------------*/
@@ -56,6 +93,7 @@ int SER_PutStr(int n, char *s)
  *----------------------------------------------------------------------------*/
 void SER_PutChar(int n, char c)
 {
+	SER_Dummy();
   if(n == 0){
     JTAG_UART_PutChar(c);
   }
@@ -68,6 +106,7 @@ void SER_PutChar(int n, char c)
   Read character from Serial Port (blocking read)
  *----------------------------------------------------------------------------*/
 char SER_GetChar(int n){
+  
   if(n == 0){
     return JTAG_UART_GetChar();
   }
@@ -106,6 +145,7 @@ void UART0_SetBaudRate(uint32_t baud_rate)
  *----------------------------------------------------------------------------*/
 void UART0_PutChar(char c)
 {
+  SER_Dummy();
   while ((UART0->UARTLSR & 0x20) == 0 || (UART0->UARTLSR & 0x40) == 0);   // Wait for UART TX to become free
   UART0->UARTDR = c;
 }
@@ -116,6 +156,7 @@ void UART0_PutChar(char c)
  *----------------------------------------------------------------------------*/
 char UART0_GetChar (void)
 {
+  SER_Dummy();
   while (UART0->UARTLSR & 0x1 == 0);                // Wait for a character to arrive
   return UART0->UARTDR;
 }
@@ -142,6 +183,7 @@ void putc(void *p, char c)
  *----------------------------------------------------------------------------*/
 void JTAG_UART_PutChar(char c)
 {
+  SER_Dummy();
   while(1)
   {
     if(JTAG_UART->control & 0xFFFF0000)
@@ -157,6 +199,7 @@ void JTAG_UART_PutChar(char c)
  *----------------------------------------------------------------------------*/
 char JTAG_UART_GetChar(void)
 {
+  SER_Dummy();
   while(1)
   {
     int data;
@@ -166,30 +209,9 @@ char JTAG_UART_GetChar(void)
   }
 }
 
-/*----------------------------------------------------------------------------
-  Serial UART interrupt handler (UART0)
- *----------------------------------------------------------------------------*/
-/*
-void SER_Interrupt(void)
-{
-  int n = UART0->UART_IIR_FCR;	            // read UART0 pending interrupt type
-  if((n & 0xF) == 0x4)			    // type 0x4 is receive data
-  {
-    while(UART0->UARTLSR & 0x1 == 0x1)	    // read while Data Ready is valid
-    {
-      char c = UART0->UARTDR;		    // would also clear the interrupt if last character is read
-      UART0_PutChar(c);			    // display back
-    }
-  }
-  else{                                     // unexpected interrupt type
-    SER_PutStr(1, "Error interrupt type\n");
-  }
-}
-*/
-
 int UART0_GetRxIRQStatus(void)
 {
-        return((UART0->UART_IIR_FCR & 0xF) == 0x4);
+  return((UART0->UART_IIR_FCR & 0xF) == 0x4);
 }
 
 int UART0_GetRxDataStatus(void)

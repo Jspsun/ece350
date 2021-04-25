@@ -82,6 +82,10 @@ typedef struct {
 extern char SER_GetChar (int n);
 extern void SER_PutChar(int n, char c);
 extern int  SER_PutStr(int n, char *s);
+extern void SER_Printf(char *, int);
+extern void SER_Dummy(void);
+extern void SER_PutNum(int);
+
 
 void UART0_Init(void);
 void UART0_PutChar(char c);
