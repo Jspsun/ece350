@@ -808,7 +808,7 @@ int k_tsk_create(task_t *task, void (*task_entry)(void), U8 prio, U16 stack_size
     }
 
     // prio invalid
-    if (prio != HIGH && prio != MEDIUM && prio != LOW && prio != LOWEST){
+    if (!(PRIO_RT < prio && prio < PRIO_NULL)){
         return RTX_ERR;
     }
 
